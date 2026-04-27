@@ -11,7 +11,16 @@ class Missle:
         self._image_left = pygame.image.load(filename).convert_alpha()
         self._image_right = pygame.image.load(filename_right).convert_alpha()
         self._image = self._image_right
+        self._right = True  # Direction the missle is facing
 
+    @property
+    def direction(self):
+        """Get the current direction of the missle."""
+        return self._right
+    @direction.setter
+    def direction(self, value):
+        """Set the direction of the missle."""
+        self._right = value
     @property
     def image(self):
         """Get the missle's image."""
@@ -23,14 +32,14 @@ class Missle:
         """Get the current y position of the missle."""
         return self._y
     
-    def move(self, direction):
+    def move(self):
         """Move the missle in the specified direction."""
-        if direction == "left":
+        if self._right:
             self._x -= 10  # Move left by 10 pixels
             self._image = self._image_left
             if self._x < 0:
-                self._image = None  # Mark missle for removal if it goes off-screen
-        elif direction == "right":
+                self._image = None
+        else:  # Mark missle for removal if it goes off-screen
             self._x += 10  # Move right by 10 pixels
             self._image = self._image_right
             if self._x > self._width:

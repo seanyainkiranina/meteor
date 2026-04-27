@@ -6,6 +6,8 @@ import pygame
 import sys
 import random
 import os
+from pygame import image
+from pygame._camera_vidcapture import Camera
 from pygame.locals import (  # pylint: disable=[E0611,W0611]
     QUIT,  # pylint: disable=[E0611,W0611]
     KEYDOWN,  # pylint: disable=[E0611,W0611]
@@ -15,10 +17,13 @@ from pygame.locals import (  # pylint: disable=[E0611,W0611]
     K_RIGHT,  # pylint: disable=[E0611,W0611]
 )
 
-from lib.meteor import Meteor  # pylint: disable=[E0611,W0611]
-from lib.plane import Plane  # pylint: disable=[E0611,W0611]
-
 sys.path.append(os.path.join(os.path.dirname(__file__), "lib"))
+
+from lib.camera import Camera  # pylint: disable=[E0611,W0611]
+from lib.meteor import Meteor  # pylint: disable=[E0611,W0611]
+from lib.pb import ParallaxBackground
+from lib.parallaxlayer import ParallaxLayer
+from lib.plane import Plane  # pylint: disable=[E0611,W0611]
 
 
 class Game:
@@ -52,6 +57,8 @@ class Game:
 
         self._right = False
 
+        self.background = None  # Will be initialized in run()
+
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
         self.x2 = 0
@@ -65,55 +72,38 @@ class Game:
             "player\\plane_right.png",
             "player\\plane.png",
         )  # Player's plane
+        self.camera = Camera(WIDTH)
+        self.background = ParallaxBackground([
+            ParallaxLayer(self.layer1, 0.2),  # far
+            ParallaxLayer(self.layer2, 0.5),  # mid
+            ParallaxLayer(self.layer3, 1.0),  # foreground
+        ])
 
-    def scroll_layer(self, image, x, speed, right=True):
-        """Scroll a layer and return updated x."""
-        if right:
-            x -= speed
-        else:
-            x += speed
-    
-        if x >= image.get_width():
-            x = 0
-        return x
-
+  
     def run(self):
         """Main game loop."""
-        x_far = x_mid = x_fore = 0
+        lastx = self.plane.world_x 
         meteors = [Meteor(self.screen.get_width(), self.screen.get_height()) for _ in range(5)]
-        
+      
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-
-            x_far = self.scroll_layer(self.layer1, x_far, self.speed1, self._right)
-            x_mid = self.scroll_layer(self.layer2, x_mid, self.speed2, self._right)
-            x_fore = self.scroll_layer(self.layer3, x_fore, self.speed3, self._right)
             # Update positions
 
             # Draw layers (two copies each for looping)
-            self.screen.blit(self.layer1, (self.x1, 0))
-            xdifference1 = self.layer1.get_width()
-            xdifference2 = self.layer2.get_width()
-            xdifference3 = self.layer3.get_width()
+       
 
-            xdifference1 = -xdifference1
-            xdifference2 = -xdifference2
-            xdifference3 = -xdifference3
-
-            self.screen.blit(self.layer1, (x_far + xdifference1, 0))
-            self.screen.blit(self.layer1, (x_far, 0))
-            self.screen.blit(self.layer2, (x_mid + xdifference2, 0))
-            self.screen.blit(self.layer2, (x_mid, 0))
-            self.screen.blit(self.layer3, (x_fore + xdifference3, 0))
-            self.screen.blit(self.layer3, (x_fore, 0))
+         
             self.plane.move()
+            self.camera.update(self.plane.world_x)
+            self.background.draw(self.screen, self.camera.x)
             self._right = self.plane.direction
+            # print(f"Plane direction: {'Right' if self._right else 'Left'}")
             self.screen.blit(self.plane.image, (self.plane.x, self.plane.y))
             if self.plane.fired_missle:
-                self.plane.fired_missle.move("right" if self._right else "left")
+                self.plane.fired_missle.move()
                 if self.plane.fired_missle.image:
                     self.screen.blit(
                         self.plane.fired_missle.image,
@@ -123,7 +113,8 @@ class Game:
                     self.plane.fired_missle = None  # Remove missle if it goes off-screen
             for meteor in meteors:
                 self.screen.blit(meteor.asteroid, (meteor.x, meteor.y))
-                meteor.move()
+                meteor.move(self.plane.world_x, lastx)
+            lastx = self.plane.world_x
             pygame.display.flip()
             self.clock.tick(60)
 
