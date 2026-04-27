@@ -1,0 +1,83 @@
+"""Plane class for the parallax scrolling game."""
+
+
+import pygame
+from lib.missle import Missle
+
+
+class Plane:
+    """Class representing the player's plane in the parallax scrolling game."""
+
+    def __init__(self, x, y, speed, width, height, filename, filename_right):
+        self._x = x
+        self._y = y
+        self._speed = speed  # Speed at which the plane moves
+        self._width = width
+        self._height = height
+        self._right = False  # Direction the plane is facing
+        self._image_left = pygame.image.load(filename).convert_alpha()
+        self._image_right = pygame.image.load(
+            filename_right
+        ).convert_alpha()  # Pygame surface for the plane facing right
+        self._image = self._image_right  # Pygame surface for the plane
+        self._missle = None  # Missle object representing the plane's missle
+
+    @property
+    def image(self):
+        """Get the plane's image."""
+        return self._image
+
+    @property
+    def x(self):
+        """Get the current x position of the plane."""
+        return self._x
+
+    @property
+    def y(self):
+        """Get the current y position of the plane."""
+        return self._y
+
+    @property
+    def direction(self):
+        """Get the current direction of the plane."""
+        return self._right
+
+    @property
+    def fired_missle(self):
+        """Get the current missle object."""
+        return self._missle
+
+    @fired_missle.setter
+    def fired_missle(self, value):
+        self._missle = value
+
+    def move(self):
+        """Move the plane to the left by its speed."""
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_UP]:
+            self._y -= self._speed
+        if keys[pygame.K_DOWN]:
+            self._y += self._speed
+        if keys[pygame.K_LEFT]:
+            self._x -= self._speed
+            self._image = self._image_right  # Change to right-facing image
+        if keys[pygame.K_RIGHT]:
+            self._x += self._speed
+            self._image = self._image_left  # Change to right-facing image
+        if keys[pygame.K_SPACE] and self._missle is None:
+            # Fire a missle if space is pressed and there isn't already one on screen
+            self._missle = Missle(
+                self._x + self._image.get_width() // 2,
+                self._y,
+                self._width,
+                self._height,
+                "player\\missle.png",
+                "player\\missle_right.png",
+            )
+        self._x = max(0, min(self._width - self._image.get_width(), self._x))
+        self._y = max(0, min(self._height - self._image.get_height(), self._y))
+
+        if keys[pygame.K_LEFT]:
+            self._right = False
+        elif keys[pygame.K_RIGHT]:
+            self._right = True
