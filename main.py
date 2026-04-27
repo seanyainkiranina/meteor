@@ -72,9 +72,8 @@ class Game:
             x -= speed
         else:
             x += speed
-        if right and x <= -image.get_width():
-            x = 0
-        if not right and x >= image.get_width():
+    
+        if x >= image.get_width():
             x = 0
         return x
 
@@ -100,10 +99,9 @@ class Game:
             xdifference2 = self.layer2.get_width()
             xdifference3 = self.layer3.get_width()
 
-            if not self._right:
-                xdifference1 = -xdifference1
-                xdifference2 = -xdifference2
-                xdifference3 = -xdifference3
+            xdifference1 = -xdifference1
+            xdifference2 = -xdifference2
+            xdifference3 = -xdifference3
 
             self.screen.blit(self.layer1, (x_far + xdifference1, 0))
             self.screen.blit(self.layer1, (x_far, 0))
