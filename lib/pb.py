@@ -1,5 +1,6 @@
 """ Parallax background management for the Meteor game."""
 class ParallaxBackground:
+    """Class to manage multiple parallax layers for the background."""
     def __init__(self, layers):
         """Initialize the parallax background with a list of layers."""
         self.layers = layers

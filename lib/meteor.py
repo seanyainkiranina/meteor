@@ -1,8 +1,8 @@
 """Meteor class for the Meteor game."""
 
+import re
 import random
 import pygame
-import re
 
 
 class Meteor:
@@ -10,7 +10,7 @@ class Meteor:
 
     def __init__(self, width, height):
         self._x = random.randint(0, width)
-        self._y = random.randint(-4000, -200)  # Start above the screen
+        self._y = random.randint(-2000, -200)  # Start above the screen
         self._width = width
         self._height = height
         self._prefixs = [
@@ -182,4 +182,4 @@ class Meteor:
         if self._y > self._height:
             self._prefix = random.choice(self._prefixs)
             self._x = random.randint(0, self._width)  # Reset to a new random x position
-            self._y = random.randint(-4000, -200)  # Reset to start above the screen
+            self._y = random.randint(-2000, -200)  # Reset to start above the screen

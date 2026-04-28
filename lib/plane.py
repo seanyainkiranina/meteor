@@ -1,6 +1,5 @@
 """Plane class for the parallax scrolling game."""
 
-
 import pygame
 from lib.missle import Missle
 
@@ -11,7 +10,7 @@ class Plane:
     def __init__(self, x, y, speed, width, height, filename, filename_right):
         self._x = x
         self._y = y
-        self._world_x = x   # new: world position
+        self._world_x = x  # new: world position
         self._speed = speed  # Speed at which the plane moves
         self._width = width
         self._height = height
@@ -22,6 +21,30 @@ class Plane:
         ).convert_alpha()  # Pygame surface for the plane facing right
         self._image = self._image_right  # Pygame surface for the plane
         self._missle = None  # Missle object representing the plane's missle
+        self._explosions = []  # List to hold explosion objects when the plane is hit
+        self._explosions.append(
+            pygame.image.load("player\\explosions\\1.png").convert_alpha()
+        )
+        self._explosions.append(
+            pygame.image.load("player\\explosions\\2.png").convert_alpha()
+        )
+        self._explosions.append(
+            pygame.image.load("player\\explosions\\3.png").convert_alpha()
+        )
+        self._explosions.append(
+            pygame.image.load("player\\explosions\\4.png").convert_alpha()
+        )
+        self._explosions.append(
+            pygame.image.load("player\\explosions\\5.png").convert_alpha()
+        )
+        self._explosions.append(
+            pygame.image.load("player\\explosions\\6.png").convert_alpha()
+        )
+        self._explosions.append(
+            pygame.image.load("player\\explosions\\7.png").convert_alpha()
+        )
+        self._exploding = False  # Flag to indicate if the plane is currently exploding
+        self._explosion_frame = 0
 
     @property
     def image(self):
@@ -57,6 +80,18 @@ class Plane:
     def fired_missle(self, value):
         self._missle = value
 
+    def explode(self):
+        """Trigger the explosion animation for the plane."""
+        clock = pygame.time.Clock()
+        self._exploding = True
+        self._explosion_frame = 0  # Start at the first frame of the explosion
+        while self._explosion_frame < len(self._explosions):
+            clock.tick(10)  # Control the speed of the explosion animation
+            self._image = self._explosions[
+                self._explosion_frame
+            ]  # Update to the current explosion frame
+            self._explosion_frame += 1  # Move to the next frame
+
     def move(self):
         """Move the plane to the left by its speed."""
         keys = pygame.key.get_pressed()
@@ -88,3 +123,8 @@ class Plane:
             self._right = True
         elif keys[pygame.K_RIGHT]:
             self._right = False
+
+        if self._right and self._exploding is False:
+            self._world_x -= self._speed
+        if self._right is False and self._exploding is False:
+            self._world_x += self._speed

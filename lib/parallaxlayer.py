@@ -23,7 +23,8 @@ class ParallaxLayer:
         screen.blit(self.image, (x, 0))
         screen.blit(self.image, (x - self.width, 0))
         screen.blit(self.image, (x + self.width, 0))
-
+       # cities = City(screen)
+       # cities.draw()
         # Debug text
-        debug_text = f"cam={camera_x:.1f} x={x:.1f} factor={self.factor}"
+        # debug_text = f"cam={camera_x:.1f} x={x:.1f} factor={self.factor}"
         # screen.blit(self.font.render(debug_text, True, (255, 255, 0)), (10, 10))

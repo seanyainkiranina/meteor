@@ -24,6 +24,7 @@ from lib.meteor import Meteor  # pylint: disable=[E0611,W0611]
 from lib.pb import ParallaxBackground
 from lib.parallaxlayer import ParallaxLayer
 from lib.plane import Plane  # pylint: disable=[E0611,W0611]
+from lib.map import Map
 
 
 class Game:
@@ -73,18 +74,22 @@ class Game:
             "player\\plane.png",
         )  # Player's plane
         self.camera = Camera(WIDTH)
-        self.background = ParallaxBackground([
-            ParallaxLayer(self.layer1, 0.2),  # far
-            ParallaxLayer(self.layer2, 0.5),  # mid
-            ParallaxLayer(self.layer3, 1.0),  # foreground
-        ])
+        self.background = ParallaxBackground(
+            [
+                ParallaxLayer(self.layer1, 0.2),  # far
+                ParallaxLayer(self.layer2, 0.5),  # mid
+                ParallaxLayer(self.layer3, 1.0),  # foreground
+            ]
+        )
 
-  
     def run(self):
         """Main game loop."""
-        lastx = self.plane.world_x 
-        meteors = [Meteor(self.screen.get_width(), self.screen.get_height()) for _ in range(5)]
-      
+        lastx = self.plane.world_x
+        map_city = Map(self.screen)
+        meteors = [
+            Meteor(self.screen.get_width(), self.screen.get_height()) for _ in range(10)
+        ]
+
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -93,9 +98,7 @@ class Game:
             # Update positions
 
             # Draw layers (two copies each for looping)
-       
 
-         
             self.plane.move()
             self.camera.update(self.plane.world_x)
             self.background.draw(self.screen, self.camera.x)
@@ -110,10 +113,14 @@ class Game:
                         (self.plane.fired_missle.x(), self.plane.fired_missle.y()),
                     )
                 else:
-                    self.plane.fired_missle = None  # Remove missle if it goes off-screen
+                    self.plane.fired_missle = (
+                        None  # Remove missle if it goes off-screen
+                    )
             for meteor in meteors:
                 self.screen.blit(meteor.asteroid, (meteor.x, meteor.y))
                 meteor.move(self.plane.world_x, lastx)
+
+            map_city.draw(lastx, self.plane.world_x)
             lastx = self.plane.world_x
             pygame.display.flip()
             self.clock.tick(60)
