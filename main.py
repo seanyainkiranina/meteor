@@ -89,7 +89,7 @@ class Game:
         meteors = [
             Meteor(self.screen.get_width(), self.screen.get_height()) for _ in range(10)
         ]
-        new_meteors= []
+        new_meteors = []
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -116,20 +116,27 @@ class Game:
                     self.plane.fired_missle = (
                         None  # Remove missle if it goes off-screen
                     )
+     # Move meteor randomly to avoid overlap
+   
+    
             for meteor in meteors:
+ 
+
                 self.screen.blit(meteor.asteroid, (meteor.x, meteor.y))
                 meteor.move(self.plane.world_x, lastx)
                 if meteor.crash_check(self.plane):
                     self.plane.explode()
                     meteor.reset()
-                if self.plane.fired_missle and self.plane.fired_missle.hit_check(meteor):
+                if self.plane.fired_missle and self.plane.fired_missle.hit_check(
+                    meteor
+                ):
                     meteor.explode()
                     self.plane.fired_missle = None  # Remove missle after hit
-                    if len(meteor.asteroids) >0:
-                        new_meteors.append(meteor.asteroids.pop(0))  # Remove the first asteroid in the list
-                        for new_meteor in new_meteors:
-                            print(f"old meteor added at position: ({meteor.x}, {meteor.y})")
-                            print(f"New meteor added at position: ({new_meteor.x}, {new_meteor.y})")
+                    if len(meteor.asteroids) > 0:
+                        new_meteors.append(
+                            meteor.asteroids.pop(0)
+                        )  # Remove the first asteroid in the list
+
             meteors.extend(new_meteors)
             new_meteors.clear()  # Clear the list for the next frame
             if self.plane.exploding:

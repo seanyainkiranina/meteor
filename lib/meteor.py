@@ -1,9 +1,8 @@
 """Meteor class for the Meteor game."""
-
+import time
 import re
 import random
 import pygame
-
 
 class Meteor:
     """Class representing the main game logic for the Meteor game."""
@@ -100,6 +99,8 @@ class Meteor:
             "J6_",
         ]
         self._prefix = random.choice(self._prefixs)
+        self._id = self._prefix + str(random.randint(1, 1000000))  # Unique ID for the meteor
+    
         if prefix is not None:
             self._asteroid = pygame.image.load(
                 f"images\\rot\\{prefix}.png"
@@ -110,6 +111,10 @@ class Meteor:
             ).convert_alpha()
         self._r = 0
 
+    @property
+    def id(self):
+        """Get the unique ID of the meteor."""
+        return self._id
     @property
     def asteroid(self):
         """Get the asteroid's image."""
@@ -126,6 +131,10 @@ class Meteor:
     def x(self):
         """Get the current x position of the asteroid."""
         return self._x
+    @x.setter
+    def x(self, value):
+        """Set the x position of the asteroid."""
+        self._x = value
 
     @property
     def y(self):
@@ -195,7 +204,7 @@ class Meteor:
         # Replace any character that is not a digit with an empty string
         return re.sub(r"[^0-9]", "", s)
 
-    def move(self, currentx, lastx):
+    def move(self, currentx, lastx, rotate=False):
         """Move the asteroid downwards."""
         self._y += random.randint(1, 5)  # Move down by a random speed
         if lastx < currentx:
@@ -203,7 +212,8 @@ class Meteor:
         elif lastx > currentx:
             self._x += random.randint(0, 2)  # Move left slightly
         if self._y > self._height:
-            self._prefix = random.choice(self._prefixs)
+            if not rotate:
+                self._prefix = random.choice(self._prefixs)
             self._x = random.randint(0, self._width)  # Reset to a new random x position
             self._y = random.randint(-2000, -200)  # Reset to start above the screen
 
@@ -215,17 +225,17 @@ class Meteor:
     
     def new_direction(self,file_name):
         """Change the direction of the meteor."""
-        start_x = 0 - self._asteroid.get_width()
-        end_x = self._x + self._asteroid.get_width()
-        if start_x ==0:
+        start_y = self._y - self._asteroid.get_height()
+        end_y = self._y + self._asteroid.get_height()
+        if start_y==0:
             return
-        array_x = [start_x, end_x]
-        new_y= self._y + random.randint(-4, 4)
+        array_y = [start_y, end_y]
+        new_x= self._x + random.randint(-4, 4)
         self._asteroids.append(Meteor(self._width,
                                       self._height,
                                        file_name,
-                                       random.choice(array_x),
-                                       new_y))
+                                       new_x,
+                                      random.choice(array_y)))
          # Move in a random direction
 
     def reset(self):
