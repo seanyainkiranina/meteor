@@ -1,5 +1,5 @@
 """Plane class for the parallax scrolling game."""
-
+import time
 import pygame
 from lib.missle import Missle
 
@@ -14,8 +14,11 @@ class Plane:
         self._speed = speed  # Speed at which the plane moves
         self._width = width
         self._height = height
+        self._last = None
         self._right = True  # Direction the plane is facing
         self._image_left = pygame.image.load(filename).convert_alpha()
+        self._org_width, self._org_height = self._image_left.get_size()
+        self._scale_factor = 4.0  # 2x bigger
         self._image_right = pygame.image.load(
             filename_right
         ).convert_alpha()  # Pygame surface for the plane facing right
@@ -52,6 +55,11 @@ class Plane:
         return self._image
 
     @property
+    def exploding(self):
+        """Get the explosion status of the plane."""
+        return self._exploding
+
+    @property
     def world_x(self):
         """Get the current world x position of the plane."""
         return self._world_x
@@ -80,32 +88,54 @@ class Plane:
     def fired_missle(self, value):
         self._missle = value
 
+    def reset_missle(self):
+        """Reset the missle to None."""
+        self._missle = None
+       
+    def reset(self):
+        """Reset the plane's position and state."""
+        time.sleep(.5)
+        self._x = self._width // 2 - self._image.get_width() // 2
+        self._y = self._height // 2 - self._image.get_height() // 2
+        self._world_x = self._x
+        self._right = True
+        self._scale_factor = 1.0
+        self._image = pygame.transform.scale(self._image_right, (int(self._org_width * self._scale_factor), int(self._org_height * self._scale_factor)))
+        self._missle = None
+        self._exploding = False
+        self._explosion_frame = 0
+
     def explode(self):
         """Trigger the explosion animation for the plane."""
-        clock = pygame.time.Clock()
         self._exploding = True
-        self._explosion_frame = 0  # Start at the first frame of the explosion
-        while self._explosion_frame < len(self._explosions):
-            clock.tick(10)  # Control the speed of the explosion animation
-            self._image = self._explosions[
+        self._y -= self._speed *2 
+        self._scale_factor += .5  # Start with original size
+        if  self._explosion_frame < len(self._explosions):
+            self._image = pygame.transform.scale(self._explosions[
                 self._explosion_frame
-            ]  # Update to the current explosion frame
+            ], (int(self._org_width * self._scale_factor ), 
+                int(self._org_height * self._scale_factor )))
+              # Update to the current explosion frame
             self._explosion_frame += 1  # Move to the next frame
+            if self._explosion_frame >= 2:
+                time.sleep(.05)
+        else:
+            self.reset()  # Reset the plane after the explosion animation is complete
 
     def move(self):
         """Move the plane to the left by its speed."""
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_UP]:
+        if keys[pygame.K_UP] and not self._exploding:
             self._y -= self._speed
-        if keys[pygame.K_DOWN]:
+        if keys[pygame.K_DOWN] and not self._exploding:
             self._y += self._speed
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] and not self._exploding:
             self._world_x -= self._speed
             self._image = self._image_right  # Change to right-facing image
-        if keys[pygame.K_RIGHT]:
+        if keys[pygame.K_RIGHT] and not self._exploding:
             self._world_x += self._speed
             self._image = self._image_left  # Change to right-facing image
-        if keys[pygame.K_SPACE] and self._missle is None:
+        if keys[pygame.K_SPACE] and self._missle is None and not self._exploding:
             # Fire a missle if space is pressed and there isn't already one on screen
             self._missle = Missle(
                 self._x + self._image.get_width() // 2,
@@ -119,9 +149,9 @@ class Plane:
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = max(0, min(self._height - self._image.get_height(), self._y))
 
-        if keys[pygame.K_LEFT]:
+        if keys[pygame.K_LEFT] and not self._exploding:
             self._right = True
-        elif keys[pygame.K_RIGHT]:
+        elif keys[pygame.K_RIGHT] and not self._exploding:
             self._right = False
 
         if self._right and self._exploding is False:

@@ -8,9 +8,14 @@ import pygame
 class Meteor:
     """Class representing the main game logic for the Meteor game."""
 
-    def __init__(self, width, height):
-        self._x = random.randint(0, width)
-        self._y = random.randint(-2000, -200)  # Start above the screen
+    def __init__(self, width, height,prefix=None,x=None,y=None):
+        self._asteroids = []
+        if x is None or y is None:
+            self._x = random.randint(0, width)
+            self._y = random.randint(-2000, -200)  # Start above the screen
+        else:
+            self._x = x
+            self._y = y
         self._width = width
         self._height = height
         self._prefixs = [
@@ -95,9 +100,14 @@ class Meteor:
             "J6_",
         ]
         self._prefix = random.choice(self._prefixs)
-        self._asteroid = pygame.image.load(
-            f"images\\rot\\{self._prefix}0.png"
-        ).convert_alpha()
+        if prefix is not None:
+            self._asteroid = pygame.image.load(
+                f"images\\rot\\{prefix}.png"
+            ).convert_alpha()   
+        else:
+            self._asteroid = pygame.image.load(
+                f"images\\rot\\{self._prefix}0.png"
+            ).convert_alpha()
         self._r = 0
 
     @property
@@ -121,7 +131,12 @@ class Meteor:
     def y(self):
         """Get the current y position of the asteroid."""
         return self._y
-
+    
+    @property
+    def asteroids(self):
+        """Get the asteroids."""
+        return self._asteroids
+    
     @property
     def prefix(self):
         """Get the current prefix of the asteroid."""
@@ -131,6 +146,10 @@ class Meteor:
     def prefix(self, value):
         """Set the prefix of the asteroid."""
         self._prefix = value
+
+    def explode(self):
+        """Trigger the explosion animation for the asteroid."""
+        self._asteroid = self.next()  # Get the next explosion frame
 
     def next(self):
         """Get the next image for the asteroid's animation."""
@@ -154,11 +173,15 @@ class Meteor:
         elif self.prefix[0] == "I":
             next_step = "J"
         newprefix = next_step + self.prefix[1:]
-        if self._prefixs.index(newprefix) >-1:
+        if newprefix in self._prefixs:
             self.prefix = next_step + self.prefix[1:]
-        self._asteroid = pygame.image.load(
-            f"images\\rot\\{self._prefix}{self._r}.png"
-        ).convert_alpha()
+            self._asteroid = pygame.image.load(
+                f"images\\rot\\{self._prefix}{self._r}.png"
+            ).convert_alpha()
+            self.new_direction(f"{self._prefix}{self._r}")
+        else:
+            self._asteroid = pygame.image.load("images\\explode.png").convert_alpha()
+            self.reset()  # Mark for removal if explosion is complete
         return self._asteroid
 
     def remove_non_numeric(self, s):
@@ -183,3 +206,30 @@ class Meteor:
             self._prefix = random.choice(self._prefixs)
             self._x = random.randint(0, self._width)  # Reset to a new random x position
             self._y = random.randint(-2000, -200)  # Reset to start above the screen
+
+    def crash_check(self, plane):
+        """Check for collision with the player's plane."""
+        plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
+        meteor_rect = self.asteroid.get_rect(topleft=(self.x, self.y))
+        return plane_rect.colliderect(meteor_rect)
+    
+    def new_direction(self,file_name):
+        """Change the direction of the meteor."""
+        start_x = 0 - self._asteroid.get_width()
+        end_x = self._x + self._asteroid.get_width()
+        if start_x ==0:
+            return
+        array_x = [start_x, end_x]
+        new_y= self._y + random.randint(-4, 4)
+        self._asteroids.append(Meteor(self._width,
+                                      self._height,
+                                       file_name,
+                                       random.choice(array_x),
+                                       new_y))
+         # Move in a random direction
+
+    def reset(self):
+        """Reset the meteor's position and prefix."""
+        self._prefix = random.choice(self._prefixs)
+        self._x = random.randint(0, self._width)  # Reset to a new random x position
+        self._y = random.randint(-2000, -200)  # Reset to start above the screen

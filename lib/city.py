@@ -15,6 +15,15 @@ class City:
         self.city_2_x = self.screen.get_width() // 2
         self.city_3_x = self.screen.get_width() // 2
 
+    def reset(self,which_city):
+        """Reset the city layer's position."""
+        if which_city == 1:
+            self.city_1_x = self.screen.get_width() // 2
+        elif which_city == 2:
+            self.city_2_x = self.screen.get_width() // 2
+        elif which_city == 3:
+            self.city_3_x = self.screen.get_width() // 2
+            
     def draw(self, which_city, increment=0):
         """Draw the city layers on the screen."""
         if which_city == 1:
