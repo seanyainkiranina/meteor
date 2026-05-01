@@ -87,7 +87,7 @@ class Game:
         lastx = self.plane.world_x
         map_city = Map(self.screen)
         meteors = [
-            Meteor(self.screen.get_width(), self.screen.get_height()) for _ in range(10)
+            Meteor(self.screen.get_width(), self.screen.get_height()) for _ in range(15)
         ]
         new_meteors = []
         while True:
@@ -97,7 +97,7 @@ class Game:
                     sys.exit()
             # Update positions
 
-            # Draw layers (two copies each for looping)
+           # Draw layers (two copies each for looping)
 
             self.plane.move()
             self.camera.update(self.plane.world_x)
@@ -116,11 +116,9 @@ class Game:
                     self.plane.fired_missle = (
                         None  # Remove missle if it goes off-screen
                     )
-     # Move meteor randomly to avoid overlap
-   
-    
+            # Move meteor randomly to avoid overlap
+
             for meteor in meteors:
- 
 
                 self.screen.blit(meteor.asteroid, (meteor.x, meteor.y))
                 meteor.move(self.plane.world_x, lastx)

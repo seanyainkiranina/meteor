@@ -1,13 +1,15 @@
 """Meteor class for the Meteor game."""
+
 import time
 import re
 import random
 import pygame
 
+
 class Meteor:
     """Class representing the main game logic for the Meteor game."""
 
-    def __init__(self, width, height,prefix=None,x=None,y=None):
+    def __init__(self, width, height, prefix=None, x=None, y=None):
         self._asteroids = []
         if x is None or y is None:
             self._x = random.randint(0, width)
@@ -17,6 +19,9 @@ class Meteor:
             self._y = y
         self._width = width
         self._height = height
+        self.rotation_speed = random.randint(
+            1, 20
+        )  # Random rotation speed for the meteor
         self._prefixs = [
             "A1_",
             "A2_",
@@ -99,12 +104,14 @@ class Meteor:
             "J6_",
         ]
         self._prefix = random.choice(self._prefixs)
-        self._id = self._prefix + str(random.randint(1, 1000000))  # Unique ID for the meteor
-    
+        self._id = self._prefix + str(
+            random.randint(1, 1000000)
+        )  # Unique ID for the meteor
+
         if prefix is not None:
             self._asteroid = pygame.image.load(
                 f"images\\rot\\{prefix}.png"
-            ).convert_alpha()   
+            ).convert_alpha()
         else:
             self._asteroid = pygame.image.load(
                 f"images\\rot\\{self._prefix}0.png"
@@ -115,22 +122,28 @@ class Meteor:
     def id(self):
         """Get the unique ID of the meteor."""
         return self._id
+
     @property
     def asteroid(self):
         """Get the asteroid's image."""
-        self._r += 1
-        if self._r > 360:
-            self._r = 0
-        if self._r % 20 == 0:
+
+        if self.rotation_speed % 50 == 0:
+            self._r += 1
+            if self._r > 360:
+                self._r = 0
             self._asteroid = pygame.image.load(
-                f"images\\rot\\{self._prefix}{self._r}.png"
-            ).convert_alpha()
+                    f"images\\rot\\{self._prefix}{self._r}.png"
+                ).convert_alpha()
+        self.rotation_speed -= 1
+        if self.rotation_speed < 0:
+            self.rotation_speed = random.randint(1, 100)
         return self._asteroid
 
     @property
     def x(self):
         """Get the current x position of the asteroid."""
         return self._x
+
     @x.setter
     def x(self, value):
         """Set the x position of the asteroid."""
@@ -140,12 +153,17 @@ class Meteor:
     def y(self):
         """Get the current y position of the asteroid."""
         return self._y
-    
+
+    @y.setter
+    def y(self, value):
+        """Set the y position of the asteroid."""
+        self._y = value
+
     @property
     def asteroids(self):
         """Get the asteroids."""
         return self._asteroids
-    
+
     @property
     def prefix(self):
         """Get the current prefix of the asteroid."""
@@ -204,6 +222,18 @@ class Meteor:
         # Replace any character that is not a digit with an empty string
         return re.sub(r"[^0-9]", "", s)
 
+    def collide(self, other):
+        """Check for collision with another meteor."""
+        rect1 = self.asteroid.get_rect(topleft=(self.x, self.y))
+        rect2 = other.asteroid.get_rect(topleft=(other.x, other.y))
+        return rect1.colliderect(rect2)
+
+    def bounce(self, other):
+        """Bounce off another meteor by swapping their velocities."""
+        # Simple bounce logic: swap x and y positions
+        self.x += random.randint(1, 5)  # Add some randomness to the bounce
+        other.x += random.randint(-5, 1)
+
     def move(self, currentx, lastx, rotate=False):
         """Move the asteroid downwards."""
         self._y += random.randint(1, 5)  # Move down by a random speed
@@ -219,24 +249,24 @@ class Meteor:
 
     def crash_check(self, plane):
         """Check for collision with the player's plane."""
+        if plane.shield_on:
+            return False  # No collision if the shield is on
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         meteor_rect = self.asteroid.get_rect(topleft=(self.x, self.y))
         return plane_rect.colliderect(meteor_rect)
-    
-    def new_direction(self,file_name):
+
+    def new_direction(self, file_name):
         """Change the direction of the meteor."""
         start_y = self._y - self._asteroid.get_height()
         end_y = self._y + self._asteroid.get_height()
-        if start_y==0:
+        if start_y == 0:
             return
         array_y = [start_y, end_y]
-        new_x= self._x + random.randint(-4, 4)
-        self._asteroids.append(Meteor(self._width,
-                                      self._height,
-                                       file_name,
-                                       new_x,
-                                      random.choice(array_y)))
-         # Move in a random direction
+        new_x = self._x + random.randint(-4, 4)
+        self._asteroids.append(
+            Meteor(self._width, self._height, file_name, new_x, random.choice(array_y))
+        )
+        # Move in a random direction
 
     def reset(self):
         """Reset the meteor's position and prefix."""
