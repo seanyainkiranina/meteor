@@ -170,10 +170,13 @@ class Plane:
             self._y += self._speed
         if keys[pygame.K_LEFT] and not self._exploding:
             self._world_x -= self._speed
-            self._right = False
         if keys[pygame.K_RIGHT] and not self._exploding:
             self._world_x += self._speed
+
+        if keys[pygame.K_LEFT] and not self._exploding:
             self._right = True
+        elif keys[pygame.K_RIGHT] and not self._exploding:
+            self._right = False
 
         if (
             keys[pygame.K_SPACE]
@@ -194,10 +197,6 @@ class Plane:
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = max(0, min(self._height - self._image.get_height(), self._y))
 
-        if keys[pygame.K_LEFT] and not self._exploding:
-            self._right = True
-        elif keys[pygame.K_RIGHT] and not self._exploding:
-            self._right = False
 
         if self._right and self._exploding is False:
             self._world_x -= self._speed
