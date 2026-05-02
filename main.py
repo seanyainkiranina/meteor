@@ -25,6 +25,7 @@ from lib.pb import ParallaxBackground
 from lib.parallaxlayer import ParallaxLayer
 from lib.plane import Plane  # pylint: disable=[E0611,W0611]
 from lib.map import Map
+from lib.startscreen import StartScreen
 
 
 class Game:
@@ -37,9 +38,9 @@ class Game:
 
         # Window setup
         WIDTH, HEIGHT = 800, 600
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self._screen = pygame.display.set_mode((WIDTH, HEIGHT))
         self.clock = pygame.time.Clock()
-
+        self.font = pygame.font.SysFont("consolas", 16)
         # Load your layers (replace with your own images)
         self.layer1 = pygame.image.load(
             "backgrounds\\layer1.png"
@@ -82,33 +83,84 @@ class Game:
             ]
         )
 
+    @property
+    def screen(self):
+        """ get screen"""
+        return self._screen
+    @screen.setter
+    def screen(self,value):
+        """ set screen"""
+        self._screen = value
+
+    def reset(self):
+        """restart game"""
+        BLACK = (0, 0, 0)
+        self._screen.fill(BLACK)
+        self.speed1 = 1
+        self.speed2 = 2
+        self.speed3 = 4
+        WIDTH, HEIGHT = 800, 600
+
+        self._right = False
+
+        self.background = None  # Will be initialized in run()
+
+        # X positions for each layer (two copies for seamless looping)
+        self.x1 = 0
+        self.x2 = 0
+        self.x3 = 0
+        self.plane = Plane(
+            WIDTH // 2,
+            HEIGHT // 2,
+            5,
+            WIDTH,
+            HEIGHT,
+            "player\\plane_right.png",
+            "player\\plane.png",
+        )  # Player's plane
+        self.camera = Camera(WIDTH)
+        self.background = ParallaxBackground(
+            [
+                ParallaxLayer(self.layer1, 0.2),  # far
+                ParallaxLayer(self.layer2, 0.5),  # mid
+                ParallaxLayer(self.layer3, 1.0),  # foreground
+            ]
+        )
+        
+
+
     def run(self):
         """Main game loop."""
         lastx = self.plane.world_x
-        map_city = Map(self.screen)
+        map_city = Map(self._screen)
         meteors = [
-            Meteor(self.screen.get_width(), self.screen.get_height()) for _ in range(15)
+            Meteor(self._screen.get_width(), self._screen.get_height()) for _ in range(5)
         ]
         new_meteors = []
-        while True:
+        loop = 0
+        running = True
+        while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    pygame.quit()
-                    sys.exit()
+                    running = False
+                if event.type == pygame.K_ESCAPE:
+                    running = False
+
             # Update positions
 
            # Draw layers (two copies each for looping)
-
+            if self.plane.lives <=0:
+                running = False
             self.plane.move()
             self.camera.update(self.plane.world_x)
-            self.background.draw(self.screen, self.camera.x)
+            self.background.draw(self._screen, self.camera.x)
             self._right = self.plane.direction
             # print(f"Plane direction: {'Right' if self._right else 'Left'}")
-            self.screen.blit(self.plane.image, (self.plane.x, self.plane.y))
+            self._screen.blit(self.plane.image, (self.plane.x, self.plane.y))
             if self.plane.fired_missle:
                 self.plane.fired_missle.move()
                 if self.plane.fired_missle.image:
-                    self.screen.blit(
+                    self._screen.blit(
                         self.plane.fired_missle.image,
                         (self.plane.fired_missle.x(), self.plane.fired_missle.y()),
                     )
@@ -117,18 +169,33 @@ class Game:
                         None  # Remove missle if it goes off-screen
                     )
             # Move meteor randomly to avoid overlap
-
+            if loop > 100:
+                loop =0
             for meteor in meteors:
+                if loop % 5 ==0:
+                    for mm in meteors:
+                        if mm == meteor:
+                            continue
+                        if mm != meteor and mm.asteroid and meteor.asteroid:
+                            m_rect = mm.asteroid.get_rect(topleft=(mm.x, mm.y))
+                            mm_rect = meteor.asteroid.get_rect(topleft=(meteor.x, meteor.y))
+                            if m_rect.colliderect(mm_rect):
+                                mm.explode()
 
-                self.screen.blit(meteor.asteroid, (meteor.x, meteor.y))
+                self._screen.blit(meteor.asteroid, (meteor.x, meteor.y))
                 meteor.move(self.plane.world_x, lastx)
-                if meteor.crash_check(self.plane):
+                if meteor.crash_check(self.plane,True):
                     self.plane.explode()
                     meteor.reset()
+                if meteor.crash_check(self.plane,False):
+                    meteor.explode()
+                    self.plane.add_score(5)
+                    self.plane.hit_on_shield()
                 if self.plane.fired_missle and self.plane.fired_missle.hit_check(
                     meteor
                 ):
                     meteor.explode()
+                    self.plane.add_score(10)
                     self.plane.fired_missle = None  # Remove missle after hit
                     if len(meteor.asteroids) > 0:
                         new_meteors.append(
@@ -143,10 +210,29 @@ class Game:
             map_city.draw(lastx, self.plane.world_x)
 
             lastx = self.plane.world_x
+            score_text = f"shield={self.plane.shield_time} score={self.plane.score} lives={self.plane.lives}"
+            self._screen.blit(self.font.render(score_text, True, (255, 255, 0)), (10, 10))
+
             pygame.display.flip()
+
             self.clock.tick(60)
+            loop +=1
+        return self.plane.score
 
 
 if __name__ == "__main__":
     game = Game()
-    game.run()
+    startup = StartScreen(game.screen)
+    startup.high_score = 0 
+    while startup.display(game.screen) is True:
+        pygame.event.clear()
+        pygame.event.clear(KEYDOWN)
+        game.reset()
+        startup.high_score = game.run()
+        pygame.event.clear(KEYDOWN)
+        pygame.event.clear()
+    pygame.display.quit()
+    pygame.quit()
+    sys.exit()
+
+    

@@ -11,6 +11,9 @@ class Plane:
     def __init__(self, x, y, speed, width, height, filename, filename_right):
         self._x = x
         self._y = y
+        self._game_over = False
+        self._score = 0
+        self._lives = 3
         self._shield_on = False
         self._world_x = x  # new: world position
         self._speed = speed  # Speed at which the plane moves
@@ -59,6 +62,11 @@ class Plane:
         self._explosion_frame = 0
 
     @property
+    def game_over(self):
+        """get game over man game over"""
+        return self._game_over
+    
+    @property
     def shield_on(self):
         """Get the shield status of the plane."""
         return self._shield_on
@@ -106,9 +114,33 @@ class Plane:
         """Reset the missle to None."""
         self._missle = None
 
+    def hit_on_shield(self):
+        """hit on shield"""
+        self._shield_time -= 10
+
+    def add_score(self, amount):
+        """Add score"""
+        self._score += amount
+
+    @property
+    def lives(self):
+        """get lives"""
+        return self._lives
+
+    @property
+    def score(self):
+        """return score"""
+        return self._score
+
+    @property
+    def shield_time(self):
+        """Time left for shield"""
+        return self._shield_time
+
     def reset(self):
         """Reset the plane's position and state."""
         time.sleep(0.5)
+        self._lives -= 1
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = self._height // 2 - self._image.get_height() // 2
         self._world_x = self._x
@@ -126,6 +158,8 @@ class Plane:
         self._explosion_frame = 0
         self._shield_on = False
         self._shield_time = 1000
+        if self._lives <= 0:
+            self._game_over = True
 
     def explode(self):
         """Trigger the explosion animation for the plane."""
@@ -151,6 +185,9 @@ class Plane:
         """Move the plane to the left by its speed."""
         keys = pygame.key.get_pressed()
 
+        if keys[pygame.K_ESCAPE]:
+            self.geme_over = True
+
         if keys[pygame.K_d]:
             if self._shield_on:
                 self._y += self._shield_left.get_height() // 2
@@ -164,6 +201,10 @@ class Plane:
 
         if self._exploding:
             self._shield_on = False
+        if keys[pygame.K_ESCAPE]:
+            self._lives =0
+            self.explode()
+            
         if keys[pygame.K_UP] and not self._exploding:
             self._y -= self._speed
         if keys[pygame.K_DOWN] and not self._exploding:
@@ -197,7 +238,6 @@ class Plane:
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = max(0, min(self._height - self._image.get_height(), self._y))
 
-
         if self._right and self._exploding is False:
             self._world_x -= self._speed
         if self._right is False and self._exploding is False:
@@ -207,6 +247,9 @@ class Plane:
             self._shield_time -= 1
             if self._shield_time <= 0:
                 self._shield_on = False
+
+        if self._lives <= 0:
+            self._game_over = True
 
         if not self._exploding:
             if self._shield_on:

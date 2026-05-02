@@ -247,9 +247,9 @@ class Meteor:
             self._x = random.randint(0, self._width)  # Reset to a new random x position
             self._y = random.randint(-2000, -200)  # Reset to start above the screen
 
-    def crash_check(self, plane):
+    def crash_check(self, plane, handle_shield_hit =False):
         """Check for collision with the player's plane."""
-        if plane.shield_on:
+        if plane.shield_on and handle_shield_hit:
             return False  # No collision if the shield is on
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         meteor_rect = self.asteroid.get_rect(topleft=(self.x, self.y))
