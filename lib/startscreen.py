@@ -7,7 +7,7 @@ from pygame.locals import (
     KEYDOWN,
     K_ESCAPE
 )  # pylint: disable=[E0611,W0611]
-
+from lib.score import Score
 
 class StartScreen:
     """Startup Screen"""
@@ -17,6 +17,7 @@ class StartScreen:
         self._font = pygame.font.SysFont("consolas", 16)
         self._starting = 1
         self._high_score = -1000
+        self._score_board = Score()
 
     @property
     def high_score(self):
@@ -27,6 +28,10 @@ class StartScreen:
     def high_score(self,value):
         """ set high score"""
         self._high_score = value
+        if value > 0:
+            self._score_board.value = value
+            self._score_board.save()
+
 
     def instructions(self):
         """Game Instructions"""
@@ -64,6 +69,10 @@ class StartScreen:
         start_y=16
         if self._high_score > 0:
             instruction_messages.append(f"Your Score:{self._high_score}")
+        high_scores = self._score_board.get_scores()
+        instruction_messages.append("High Scores")
+        for h in high_scores:
+            instruction_messages.append(h)
         text_messages = self.display_instructions(10, instruction_messages)
         while self._starting == 1:
             for event in pygame.event.get():
