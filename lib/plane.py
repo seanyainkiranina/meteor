@@ -11,6 +11,7 @@ class Plane:
     def __init__(self, x, y, speed, width, height, filename, filename_right):
         self._x = x
         self._y = y
+        self._step = 0
         self._game_over = False
         self._score = 0
         self._lives = 3
@@ -121,6 +122,13 @@ class Plane:
     def add_score(self, amount):
         """Add score"""
         self._score += amount
+        if (self._score % 1000) == 0  and self._step< self._score:
+            self._lives +=1
+            self._step = self._score
+
+    def add_shield(self,amount):
+        """Add shield"""
+        self._shield_time +=amount
 
     @property
     def lives(self):
@@ -246,6 +254,7 @@ class Plane:
         if self._shield_on:
             self._shield_time -= 1
             if self._shield_time <= 0:
+                self._y += self._shield_left.get_height() // 2
                 self._shield_on = False
 
         if self._lives <= 0:

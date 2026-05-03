@@ -39,6 +39,7 @@ class StartScreen:
         instruct.append("Welcome to Meteor")
         instruct.append("Space bar to fire arrows to move")
         instruct.append("s for shields on d for shields off")
+        instruct.append("extra life after scoring 1000 points")
         instruct.append("Esc to exit")
         instruct.append("Anykey to Start")
         return instruct
@@ -46,10 +47,12 @@ class StartScreen:
     def display_instructions(self, start_y, instructions):
         """Display Instructions"""
         display_instruct = []
+        done = False
         for i in instructions:
             t = {}
-            if i.split(" ")[1] == str(self._high_score):
+            if i.split(" ")[1] == str(self._high_score) and done is False:
                 t["text"] = self._font.render(i, True, (255, 0, 0))
+                done = True
             else:
                 t["text"] = self._font.render(i, True, (255, 255, 255))
             start_y += 16
