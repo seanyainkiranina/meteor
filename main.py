@@ -38,7 +38,7 @@ class Game:
 
         # Window setup
         screen_width, screen_height = 800, 600
-        self._screen = pygame.display.set_mode(( screen_width, screen_height))
+        self._screen = pygame.display.set_mode((screen_width, screen_height))
         self.clock = pygame.time.Clock()
         self.font = pygame.font.SysFont("consolas", 16)
         # Load your layers (replace with your own images)
@@ -187,7 +187,7 @@ class Game:
                 self._screen.blit(meteor.asteroid, (meteor.x, meteor.y))
                 meteor.move(self.plane.world_x, lastx)
                 if map_city.city.hit_meteor_check(meteor):
-                    self.plane.add_score(-5)
+                    self.plane.add_score(-100)
                 if meteor.crash_check(self.plane, True):
                     self.plane.explode()
                     meteor.reset()
@@ -212,7 +212,11 @@ class Game:
                 self.plane.explode()  # Continue explosion animation
 
             map_city.draw(self.plane.world_x, lastx)
-            if map_city.diamond is not None and  map_city.diamond.hit is False and map_city.diamond.image is not None:
+            if (
+                map_city.diamond is not None
+                and map_city.diamond.hit is False
+                and map_city.diamond.image is not None
+            ):
                 self._screen.blit(
                     map_city.diamond.image,
                     (map_city.diamond.x, map_city.diamond.y),
@@ -220,15 +224,13 @@ class Game:
                 map_city.diamond.move()
                 if self.plane is not None and self.plane.image is not None:
                     if map_city.diamond.hit_player_check(self.plane):
-                        self.plane.add_score(100)
                         self.plane.add_shield(100)
                         map_city.diamond.hit = True
                         map_city.diamond.y = 600
                         map_city.diamond = None
-                        
 
             lastx = self.plane.world_x
-            score_text = f"shield={self.plane.shield_time} score={self.plane.score} lives={self.plane.lives}"
+            score_text = f"Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives} City Number:{map_city.which}"
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )

@@ -238,9 +238,9 @@ class Meteor:
         """Move the asteroid downwards."""
         self._y += random.randint(1, 5)  # Move down by a random speed
         if lastx < currentx:
-            self._x -= random.randint(0, 2)  # Move right slightly
+            self._x -= 5  # Move right slightly
         elif lastx > currentx:
-            self._x += random.randint(0, 2)  # Move left slightly
+            self._x += 5  # Move left slightly
         if self._y > self._height:
             if not rotate:
                 self._prefix = random.choice(self._prefixs)

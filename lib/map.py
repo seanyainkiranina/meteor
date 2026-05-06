@@ -16,6 +16,11 @@ class Map:
         """Diamonds are owned by the cities"""
         return self._diamond
 
+    @property
+    def which(self):
+        """city number"""
+        return self.city.which
+
     @diamond.setter
     def diamond(self, value):
         """Diamonds can be destroyed"""
