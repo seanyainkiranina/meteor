@@ -11,6 +11,8 @@ class Plane:
     def __init__(self, x, y, speed, width, height, filename, filename_right):
         self._x = x
         self._y = y
+        self._smart_bombs = 3
+        self._using_smart_bombs = False
         self._step = 0
         self._game_over = False
         self._score = 0
@@ -111,6 +113,22 @@ class Plane:
     def fired_missle(self, value):
         self._missle = value
 
+    @property
+    def smart_bombs(self):
+        """Get the number of smart bombs available."""
+        return self._smart_bombs
+    
+    @property
+    def using_smart_bombs(self):
+        """Check if a smart bomb is being used."""
+        return self._using_smart_bombs
+
+    def used_smart_bombs(self):
+        """Reset the smart bomb usage status."""
+        self._using_smart_bombs = False
+
+
+  
     def reset_missle(self):
         """Reset the missle to None."""
         self._missle = None
@@ -206,6 +224,12 @@ class Plane:
                 if not self._shield_on:
                     self._y -= self._shield_left.get_height() // 2
                 self._shield_on = True
+
+        if keys[pygame.K_a]:
+            if self._smart_bombs > 0 and not self._using_smart_bombs:
+                self._smart_bombs -= 1
+                print(f"Smart bombs left: {self._smart_bombs}")
+                self._using_smart_bombs = True
 
         if self._exploding:
             self._shield_on = False

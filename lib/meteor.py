@@ -181,6 +181,8 @@ class Meteor:
     def next(self):
         """Get the next image for the asteroid's animation."""
         next_step = "X"
+        last_width = self.asteroid.get_width()
+        last_height = self.asteroid.get_height()
         if self.prefix[0] == "A":
             next_step = "B"
         elif self.prefix[0] == "B":
@@ -205,6 +207,14 @@ class Meteor:
             self._asteroid = pygame.image.load(
                 f"images\\rot\\{self._prefix}{self._r}.png"
             ).convert_alpha()
+            if last_width < self.asteroid.get_width() or last_height < self.asteroid.get_height():
+                self._asteroid = pygame.transform.scale(
+                    self.asteroid,
+                    (
+                        int(last_width * .75),
+                        int(last_height * .75),
+                    )
+                )
             self.new_direction(f"{self._prefix}{self._r}")
         else:
             self._asteroid = pygame.image.load("images\\explode.png").convert_alpha()

@@ -172,6 +172,9 @@ class Game:
             if loop > 100:
                 loop = 0
             for meteor in meteors:
+                if self.plane.using_smart_bombs:
+                    meteor.explode()
+                
                 if loop % 5 == 0:
                     for mm in meteors:
                         if mm == meteor:
@@ -211,6 +214,8 @@ class Game:
             if self.plane.exploding:
                 self.plane.explode()  # Continue explosion animation
 
+            if loop % 20 == 0:
+                self.plane.used_smart_bombs()  # Reset smart bomb usage status
             map_city.draw(self.plane.world_x, lastx)
             if (
                 map_city.diamond is not None
@@ -230,7 +235,7 @@ class Game:
                         map_city.diamond = None
 
             lastx = self.plane.world_x
-            score_text = f"Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives} City Number:{map_city.which}"
+            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives} City Number:{map_city.which} City X:{map_city.position} World X:{self.plane.world_x}   "
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )

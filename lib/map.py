@@ -21,6 +21,16 @@ class Map:
         """city number"""
         return self.city.which
 
+    @property
+    def position(self):
+        """city position"""
+        return self.city.position
+
+    @property
+    def x(self):
+        """x position of the city"""
+        return self.city.x
+
     @diamond.setter
     def diamond(self, value):
         """Diamonds can be destroyed"""

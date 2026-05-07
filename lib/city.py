@@ -28,22 +28,32 @@ class City:
         self._diamond = None
         self._which = -1
         self._diff_x = 0
-        self._max = len(self._cities)-1
+        self._max = len(self._cities) - 1
         index = 0
         first = -9000
-        while index < self._max+1:
+        while index < self._max + 1:
             self._exploded.append(False)
             self._cities_x.append(self._screen.get_width() // 2)
             self._craters.append(
                 pygame.image.load("backgrounds\\crater.png").convert_alpha()
             )
             self._cities_positions.append(first)
-            first += 4000
+            first += 6000
             index += 1
 
     @property
+    def x(self):
+        """Get the current x position of the city."""
+        return self._cities_x[self._which]
+
+    @property
+    def position(self):
+        """Get the current position of the city."""
+        return self._cities_positions[self._which]
+
+    @property
     def which(self):
-        """ which city """
+        """which city"""
         return self._which
 
     @property
@@ -63,15 +73,12 @@ class City:
         while index < self._max:
             if index >= len(self._cities_x):
                 self._cities_x.append(self._screen.get_width() // 2)
-            if where_city > self._cities_positions[index] - 2000 and where_city < (
-                    self._cities_positions[index] + 2000
-            ):
+            if where_city > self._cities_positions[index] - 1000 and where_city < (
+                self._cities_positions[index] + 1000
+            ) and self._exploded[index] is False:
                 self._which = index
-                if (
-                    self._exploded[index] is False
-                    and self.draw(index, diff_x)
-                    and random.randint(0, 100) % 50 == 0
-                ):
+                self.draw(index, diff_x)
+                if (random.randint(0, 100) % 75 == 0) and self._diamond is None:
                     if self._diamond is None:
                         self._diamond = Diamond(
                             self._cities_x[index],
@@ -100,7 +107,7 @@ class City:
         if self._exploded[self._which] is True:
             return False
         city_x = self._cities_x[self._which]
-        city_y = self._screen.get_height() - self._cities[self._which].get_height()  + 5
+        city_y = self._screen.get_height() - self._cities[self._which].get_height() + 5
         city_rect = self._cities[self._which].get_rect(topleft=(city_x, city_y))
         meteor_rect = meteor.asteroid.get_rect(topleft=(meteor.x, meteor.y))
         boom = city_rect.colliderect(meteor_rect)
