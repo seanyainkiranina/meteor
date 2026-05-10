@@ -19,7 +19,11 @@ class Bullet:
         self._direction_set = False
         self._up = False
         self._firing_up_down = False
+        self._start_x = x
 
+    def expired(self):
+        """Check if the bullet has expired (moved too far from its starting point)."""
+        return abs(self._x - self._start_x) > 1000
     @property
     def direction_set(self):
         """Check if the bullet's direction has been set."""
@@ -54,8 +58,36 @@ class Bullet:
         """Get the current image of the bullet."""
         return self._image
 
+    def fire(self, plane):
+        """Fire the bullet in the direction of the plane."""
+        if not self._direction_set:
+            if plane.x < self._x:
+                self._right = True
+                self._image = self._right_image
+            else:
+                self._right = False
+                self._image = self._left_image
+            self._direction_set = True
+            if plane.y < self._y:
+                self._up = True
+            if plane.y > self._y:
+                self._up = False
+            self._firing_up_down = True
+
     def move(self, plane):
         """Move the bullet upwards across the screen."""
+        if self.expired():
+            self._image = None  # Mark bullet for removal if it has expired
+            return
+        if self._image is None:
+            return  # Bullet is already marked for removal
+        plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
+        bullet_rect = self._image.get_rect(topleft=(self._x, self._y))
+        if plane_rect.colliderect(bullet_rect):
+            plane.explode()
+            plane.resetting = True  # Mark the plane for reset after being hit
+            self._image = None  # Mark bullet for removal after hitting the plane
+            return
         if not self._direction_set:
             if plane.x < self._x:
                 self._right = True

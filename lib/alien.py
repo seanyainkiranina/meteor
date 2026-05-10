@@ -53,7 +53,10 @@ class Alien:
     def bullet(self):
         """Get the current bullet of the alien."""
         return self._bullet
-
+    @bullet.setter
+    def bullet(self, value):
+        """Set the bullet of the alien."""
+        self._bullet = value
 
     def move(self, meteors, plane, aliens, missle):
         """Move the alien using world coordinates."""
@@ -117,15 +120,14 @@ class Alien:
                 self._y + self._image.get_height() // 2,
             )
             self._bullet.firing_up_down = True
+            if self._bullet is not None:
+                if self._bullet.image is not None:
+                    self._bullet.fire(plane)
+                    return self._bullet
 
-        if self._bullet is not None:
-            bullet_rect = self._bullet.image.get_rect(
-                topleft=(self._bullet.x, self._bullet.y)
-            )
-            if bullet_rect.colliderect(plane_rect):
-                plane.explode()
-                self._bullet = None  # Remove bullet after hitting the plane
 
+        if self._bullet is not None and self._bullet.image is None:
+            self._bullet = None  # Remove bullet if it goes off-screen
 
         if missle is not None:
             missle_rect = missle.image.get_rect(topleft=(missle.x(), missle.y()))
@@ -161,22 +163,8 @@ class Alien:
     #    if self._visible is False:
     #        return
 
-        if fire and self._bullet is None and self._insights:
-            self._bullet = Bullet(
-                self._screen,
-                self._x + self._image.get_width(),
-                self._y + self._image.get_height() // 2,
-            )
-            self._bullet.firing_up_down = True
-        if self._bullet is not None:
-            self._bullet.move(plane)
-            if (
-                self._bullet.y < -1
-                or self._bullet.y > self._screen.get_height() + 3000
-                or self._bullet.x < -3000
-                or self._bullet.x > self._screen.get_width() + 3000
-            ):
-                self._bullet = None  # Remove bullet if it goes off-screen
+        if self._bullet is not None and plane.resetting is True:
+            self._bullet = None  # Remove bullet after hitting the plane
 
         self._speed = random.randint(2, 10)  # Randomize speed for more dynamic movement
         if self._right:
@@ -238,3 +226,6 @@ class Alien:
         # Draw alien
         if self._visible:
             self._screen.blit(self._image, (self._x, self._y))
+
+  
+        return None

@@ -36,7 +36,7 @@ class Game:
         """Initialize the game and load resources."""
 
         pygame.init()
-
+        self._reset = False
         # Window setup
         screen_width, screen_height = 800, 600
         self._screen = pygame.display.set_mode((screen_width, screen_height))
@@ -62,6 +62,7 @@ class Game:
 
         self.background = None  # Will be initialized in run()
         self._aliens = []
+        self._bullets = []
         for _ in range(random.randint(1, 5)):
             self._aliens.append(Alien(self._screen))
         # X positions for each layer (two copies for seamless looping)
@@ -104,11 +105,10 @@ class Game:
         self.speed2 = 2
         self.speed3 = 4
         screen_width, screen_height = 800, 600
-
+        self._bullets.clear()
         self._right = False
 
         self.background = None  # Will be initialized in run()
-
         self._aliens = []
         for _ in range(random.randint(1, 5)):
             self._aliens.append(Alien(self._screen))
@@ -146,6 +146,9 @@ class Game:
         new_meteors = []
         loop = 0
         running = True
+        self._bullets = []
+        bullets_to_remove = []
+        bullet = None
         while running:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -183,16 +186,25 @@ class Game:
                 loop = 0
             for alien in self._aliens:
                 if alien is not None:
-                    alien.move(meteors, self.plane, self._aliens,self.plane.fired_missle)
+                    bullet =alien.move(meteors, self.plane, self._aliens,self.plane.fired_missle)
+                    if bullet is not None and bullet.image is not None:
+                        self._bullets.append(bullet)
                     self._screen.blit(alien.image, (alien.x, alien.y))
-                    if alien.bullet is not None and alien.bullet.image is not None:
-                        self._screen.blit(
-                            alien.bullet.image,
-                            (alien.bullet.x, alien.bullet.y),
-                        )
                     if alien.x < -1000 or alien.x > self._screen.get_width() + 1000:
                         self._aliens.remove(alien)
                         self._aliens.append(Alien(self._screen))
+            for b in self._bullets:
+                if b is not None and b.image is not None:
+                    self._screen.blit(b.image, (b.x, b.y))
+                    b.move(self.plane)
+                else:
+                    bullets_to_remove.append(b)
+   
+            for b in bullets_to_remove:
+                if b in self._bullets:
+                    self._bullets.remove(b)
+
+            bullets_to_remove.clear()  # Clear the list for the next frame       
 
             for meteor in meteors:
                 if self.plane.using_smart_bombs:
@@ -211,7 +223,7 @@ class Game:
                                 mm.explode()
 
                 self._screen.blit(meteor.asteroid, (meteor.x, meteor.y))
-                meteor.move(self.plane.world_x, lastx)
+                meteor.move(self.plane)
                 if map_city.city.hit_meteor_check(meteor):
                     self.plane.add_score(-100)
                 if meteor.crash_check(self.plane, True):
@@ -258,7 +270,7 @@ class Game:
                         map_city.diamond = None
 
             lastx = self.plane.world_x
-            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives}    "
+            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives}     "
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )
@@ -266,6 +278,7 @@ class Game:
             pygame.display.flip()
 
             self.clock.tick(60)
+            self.plane.resetting = False  # Reset the plane's resetting status after handling it
             loop += 1
         return self.plane.score
 

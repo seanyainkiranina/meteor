@@ -39,7 +39,7 @@ class StartScreen:
         instruct.append("Welcome to Meteor")
         instruct.append("Space bar to fire arrows to move")
         instruct.append("s for shields on d for shields off")
-        instruct.append("f to toggle speed burst, g for hyper space random up or down ")
+        instruct.append("f to toggle speed burst, g for hyper space jump")
         instruct.append("a to fire smart bomb ")
         instruct.append("extra life after every 1000 points")
         instruct.append("Esc to exit")

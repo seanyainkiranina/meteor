@@ -67,6 +67,22 @@ class Plane:
         )
         self._exploding = False  # Flag to indicate if the plane is currently exploding
         self._explosion_frame = 0
+        self._reset = False
+
+    @property
+    def counter(self):
+        """Get the counter value."""
+        return self._counter
+
+    @property
+    def resetting(self):
+        """Check if the plane needs to be reset after an explosion."""
+        return self._reset
+    
+    @resetting.setter
+    def resetting(self, value):
+        """Set the resetting status of the plane."""
+        self._reset = value
 
     @property
     def game_over(self):
@@ -151,6 +167,10 @@ class Plane:
         self._shield_time += amount
 
     @property
+    def speed(self):
+        """Speed the plane is flying."""
+        return self._speed
+    @property
     def lives(self):
         """get lives"""
         return self._lives
@@ -168,6 +188,7 @@ class Plane:
     def reset(self):
         """Reset the plane's position and state."""
         time.sleep(0.5)
+        self._reset = True
         self._lives -= 1
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = self._height // 2 - self._image.get_height() // 2
@@ -255,6 +276,7 @@ class Plane:
         if keys[pygame.K_g] and self._jumped is False and not self._exploding:
             self._jumped = True
             self._y = random.randint(self._image.get_height(), 600 - self._image.get_height())
+            self._world_x = random.randint(self._world_x-self._width, self._world_x+self._width)
 
         if keys[pygame.K_UP] and not self._exploding:
             self._y -= self._speed

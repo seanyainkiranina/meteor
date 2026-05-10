@@ -17,6 +17,7 @@ class Meteor:
         else:
             self._x = x
             self._y = y
+        self._world_x = self.screen_to_world_x(self._x, self._x, width)
         self._width = width
         self._height = height
         self.rotation_speed = random.randint(
@@ -117,6 +118,10 @@ class Meteor:
                 f"images\\rot\\{self._prefix}0.png"
             ).convert_alpha()
         self._r = 0
+
+    def screen_to_world_x(self,screen_x, camera_x, screen_width):
+        """ Convert screen x coordinate to world x coordinate based on camera position and screen width."""
+        return screen_x + camera_x - screen_width // 2
 
     @property
     def id(self):
@@ -244,17 +249,16 @@ class Meteor:
         self.x += random.randint(1, 5)  # Add some randomness to the bounce
         other.x += random.randint(-5, 1)
 
-    def move(self, currentx, lastx, rotate=False):
+    def move(self, plane,  rotate=False):
         """Move the asteroid downwards."""
-        self._y += random.randint(1, 5)  # Move down by a random speed
-        if lastx < currentx:
-            self._x -= 5  # Move right slightly
-        elif lastx > currentx:
-            self._x += 5  # Move left slightly
+        speed = random.randint(1, 5)
+        self._y += speed  # Move down by a random speed
+        # Convert world → screen for drawing
+        self._x = self._world_x - plane.world_x + self._width // 2
         if self._y > self._height:
             if not rotate:
                 self._prefix = random.choice(self._prefixs)
-            self._x = random.randint(0, self._width)  # Reset to a new random x position
+        #    self._x = random.randint(0, self._width)  # Reset to a new random x position
             self._y = random.randint(-2000, -200)  # Reset to start above the screen
 
     def crash_check(self, plane, handle_shield_hit =False):
