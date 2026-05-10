@@ -8,7 +8,7 @@ from lib.bullet import Bullet  # pylint: disable=[E0611,W0611]
 
 class Alien:
     """ Alien class represents an alien that moves across the screen and can fire bullets at the player's plane."""
-    def __init__(self, screen):
+    def __init__(self, screen,plane):
         self._screen = screen
         self._speed = 1
         self._bullet = None
@@ -25,10 +25,10 @@ class Alien:
         # Random start direction and world position
         if random.randint(0, 100) % 2 == 0:
             self._right = True
-            self._world_x = -2000 - startx
+            self._world_x = -2000 + plane.world_x
             self._image = self._image_right
         else:
-            self._world_x = screen.get_width() + 2000 + startx
+            self._world_x =  2000 + plane.world_x
             self._image = self._image_left
 
         self._y = random.randint(self._image.get_height(), screen.get_height() // 2)

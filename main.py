@@ -8,6 +8,7 @@ import random
 import os
 from pygame import image
 from pygame._camera_vidcapture import Camera
+from pygame.examples import aliens
 from pygame.locals import (  # pylint: disable=[E0611,W0611]
     QUIT,  # pylint: disable=[E0611,W0611]
     KEYDOWN,  # pylint: disable=[E0611,W0611]
@@ -63,8 +64,6 @@ class Game:
         self.background = None  # Will be initialized in run()
         self._aliens = []
         self._bullets = []
-        for _ in range(random.randint(1, 5)):
-            self._aliens.append(Alien(self._screen))
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
         self.x2 = 0
@@ -78,6 +77,8 @@ class Game:
             "player\\plane_right.png",
             "player\\plane.png",
         )  # Player's plane
+        for _ in range(random.randint(1, 5)):
+            self._aliens.append(Alien(self._screen,self.plane))
         self.camera = Camera(screen_width)
         self.background = ParallaxBackground(
             [
@@ -111,7 +112,7 @@ class Game:
         self.background = None  # Will be initialized in run()
         self._aliens = []
         for _ in range(random.randint(1, 5)):
-            self._aliens.append(Alien(self._screen))
+            self._aliens.append(Alien(self._screen,self.plane))
 
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
@@ -182,8 +183,9 @@ class Game:
             if random.randint(0, 100) % 20 == 0 and len(meteors) < 5:
                 for _ in range(random.randint(0, 5)):
                     meteors.append(Meteor(self._screen.get_width(), self._screen.get_height(), self.plane.world_x))
-                for _ in range(random.randint(0, 1)):
-                    self._aliens.append(Alien(self._screen))
+                if len(self._aliens) < 5:
+                    for _ in range(random.randint(0, 1)):
+                        self._aliens.append(Alien(self._screen,self.plane))
             loop = 0
             for alien in self._aliens:
                 if alien is not None:
@@ -191,9 +193,10 @@ class Game:
                     if bullet is not None and bullet.image is not None:
                         self._bullets.append(bullet)
                     self._screen.blit(alien.image, (alien.x, alien.y))
-                    if alien.x < -1000 or alien.x > self._screen.get_width() + 1000:
+                    print(f"Alien at x: {alien.x}, y: {alien.y}")
+                    if alien.x < -3000 or alien.x >  3000:
                         self._aliens.remove(alien)
-                        self._aliens.append(Alien(self._screen))
+                        self._aliens.append(Alien(self._screen,self.plane))
             for b in self._bullets:
                 if b is not None and b.image is not None:
                     self._screen.blit(b.image, (b.x, b.y))
