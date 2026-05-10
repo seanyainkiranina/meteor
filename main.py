@@ -193,7 +193,6 @@ class Game:
                     if bullet is not None and bullet.image is not None:
                         self._bullets.append(bullet)
                     self._screen.blit(alien.image, (alien.x, alien.y))
-                    print(f"Alien at x: {alien.x}, y: {alien.y}")
                     if alien.x < -3000 or alien.x >  3000:
                         self._aliens.remove(alien)
                         self._aliens.append(Alien(self._screen,self.plane))
