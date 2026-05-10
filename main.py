@@ -140,7 +140,7 @@ class Game:
         lastx = self.plane.world_x
         map_city = Map(self._screen)
         meteors = [
-            Meteor(self._screen.get_width(), self._screen.get_height())
+            Meteor(self._screen.get_width(), self._screen.get_height(), self.plane.world_x)
             for _ in range(5)
         ]
         new_meteors = []
@@ -179,11 +179,12 @@ class Game:
                         None  # Remove missle if it goes off-screen
                     )
             # Move meteor randomly to avoid overlap
-            if loop > 100:
-                if random.randint(0, 100) % 20 == 0:
-                    for _ in range(random.randint(0, 1)):
-                        self._aliens.append(Alien(self._screen))
-                loop = 0
+            if random.randint(0, 100) % 20 == 0 and len(meteors) < 5:
+                for _ in range(random.randint(0, 5)):
+                    meteors.append(Meteor(self._screen.get_width(), self._screen.get_height(), self.plane.world_x))
+                for _ in range(random.randint(0, 1)):
+                    self._aliens.append(Alien(self._screen))
+            loop = 0
             for alien in self._aliens:
                 if alien is not None:
                     bullet =alien.move(meteors, self.plane, self._aliens,self.plane.fired_missle)
@@ -246,6 +247,16 @@ class Game:
 
             meteors.extend(new_meteors)
             new_meteors.clear()  # Clear the list for the next frame
+            for meteor in meteors:
+                if meteor.y > self._screen.get_height():
+                    new_meteors.append(meteor)
+
+            for new_meteor in new_meteors:
+                if new_meteor in meteors:
+                    meteors.remove(new_meteor)
+
+            new_meteors.clear()  # Clear the list for the next frame
+
             if self.plane.exploding:
                 self.plane.explode()  # Continue explosion animation
 
@@ -270,7 +281,7 @@ class Game:
                         map_city.diamond = None
 
             lastx = self.plane.world_x
-            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives}     "
+            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives} Meteors:{len(meteors)} Aliens:{len(self._aliens)}"
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )

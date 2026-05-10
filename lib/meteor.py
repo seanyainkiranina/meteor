@@ -9,7 +9,7 @@ import pygame
 class Meteor:
     """Class representing the main game logic for the Meteor game."""
 
-    def __init__(self, width, height, prefix=None, x=None, y=None):
+    def __init__(self, width, height, world_x=0, prefix=None, x=None, y=None):
         self._asteroids = []
         if x is None or y is None:
             self._x = random.randint(0, width)
@@ -17,7 +17,7 @@ class Meteor:
         else:
             self._x = x
             self._y = y
-        self._world_x = self.screen_to_world_x(self._x, self._x, width)
+        self._world_x = self.screen_to_world_x(self._x, world_x, width)
         self._width = width
         self._height = height
         self.rotation_speed = random.randint(
@@ -119,8 +119,8 @@ class Meteor:
             ).convert_alpha()
         self._r = 0
 
-    def screen_to_world_x(self,screen_x, camera_x, screen_width):
-        """ Convert screen x coordinate to world x coordinate based on camera position and screen width."""
+    def screen_to_world_x(self, screen_x, camera_x, screen_width):
+        """Convert screen x coordinate to world x coordinate based on camera position and screen width."""
         return screen_x + camera_x - screen_width // 2
 
     @property
@@ -137,8 +137,8 @@ class Meteor:
             if self._r > 360:
                 self._r = 0
             self._asteroid = pygame.image.load(
-                    f"images\\rot\\{self._prefix}{self._r}.png"
-                ).convert_alpha()
+                f"images\\rot\\{self._prefix}{self._r}.png"
+            ).convert_alpha()
         self.rotation_speed -= 1
         if self.rotation_speed < 0:
             self.rotation_speed = random.randint(1, 100)
@@ -212,13 +212,16 @@ class Meteor:
             self._asteroid = pygame.image.load(
                 f"images\\rot\\{self._prefix}{self._r}.png"
             ).convert_alpha()
-            if last_width < self.asteroid.get_width() or last_height < self.asteroid.get_height():
+            if (
+                last_width < self.asteroid.get_width()
+                or last_height < self.asteroid.get_height()
+            ):
                 self._asteroid = pygame.transform.scale(
                     self.asteroid,
                     (
-                        int(last_width * .75),
-                        int(last_height * .75),
-                    )
+                        int(last_width * 0.75),
+                        int(last_height * 0.75),
+                    ),
                 )
             self.new_direction(f"{self._prefix}{self._r}")
         else:
@@ -249,7 +252,7 @@ class Meteor:
         self.x += random.randint(1, 5)  # Add some randomness to the bounce
         other.x += random.randint(-5, 1)
 
-    def move(self, plane,  rotate=False):
+    def move(self, plane, rotate=False):
         """Move the asteroid downwards."""
         speed = random.randint(1, 5)
         self._y += speed  # Move down by a random speed
@@ -259,9 +262,8 @@ class Meteor:
             if not rotate:
                 self._prefix = random.choice(self._prefixs)
         #    self._x = random.randint(0, self._width)  # Reset to a new random x position
-            self._y = random.randint(-2000, -200)  # Reset to start above the screen
 
-    def crash_check(self, plane, handle_shield_hit =False):
+    def crash_check(self, plane, handle_shield_hit=False):
         """Check for collision with the player's plane."""
         if plane.shield_on and handle_shield_hit:
             return False  # No collision if the shield is on
@@ -278,7 +280,14 @@ class Meteor:
         array_y = [start_y, end_y]
         new_x = self._x + random.randint(-4, 4)
         self._asteroids.append(
-            Meteor(self._width, self._height, file_name, new_x, random.choice(array_y))
+            Meteor(
+                self._width,
+                self._height,
+                self._world_x + random.randint(-4, 4),
+                file_name,
+                new_x,
+                random.choice(array_y),
+            )
         )
         # Move in a random direction
 
