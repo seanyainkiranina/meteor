@@ -190,7 +190,7 @@ class Game:
                             alien.bullet.image,
                             (alien.bullet.x, alien.bullet.y),
                         )
-                    if alien.x < -100 or alien.x > self._screen.get_width() + 100:
+                    if alien.x < -1000 or alien.x > self._screen.get_width() + 1000:
                         self._aliens.remove(alien)
                         self._aliens.append(Alien(self._screen))
 
@@ -258,7 +258,7 @@ class Game:
                         map_city.diamond = None
 
             lastx = self.plane.world_x
-            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives} City Number:{map_city.which} City X:{map_city.position} World X:{self.plane.world_x}   "
+            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives}    "
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )
