@@ -148,13 +148,13 @@ class Alien:
         if self._right:
             self._x += self._speed
             self._image = self._image_right
-            if self._x < plane.x:
+            if self._x < plane.x and plane.y < self._y+50 and plane.y > self._y-50:
                 self._insights = True
         else:
             self._x -= self._speed
             self._image = self._image_left
             lookahead_distance = -lookahead_distance
-            if self._x > plane.x:
+            if self._x > plane.x and plane.y < self._y+50 and plane.y > self._y-50:
                 self._insights = True
 
         for a in aliens:
@@ -176,6 +176,10 @@ class Alien:
 
         for meteor in meteors:
             meteor_rect = meteor.asteroid.get_rect(topleft=(meteor.x, meteor.y))
+            if meteor_rect.colliderect(alien_rect):
+                self._image = self._explosion
+                self._visible = False
+
             if meteor_rect.colliderect(
                 pygame.Rect(
                     self._x + lookahead_distance,

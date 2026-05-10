@@ -1,5 +1,6 @@
 """Plane class for the parallax scrolling game."""
 
+import random
 import time
 import pygame
 from lib.missle import Missle
@@ -11,12 +12,15 @@ class Plane:
     def __init__(self, x, y, speed, width, height, filename, filename_right):
         self._x = x
         self._y = y
+        self._saved_speed = speed
         self._smart_bombs = 3
         self._using_smart_bombs = False
+        self._counter =0
         self._step = 0
         self._game_over = False
         self._score = 0
         self._lives = 3
+        self._jumped = False
         self._shield_on = False
         self._world_x = x  # new: world position
         self._speed = speed  # Speed at which the plane moves
@@ -68,7 +72,7 @@ class Plane:
     def game_over(self):
         """get game over man game over"""
         return self._game_over
-    
+
     @property
     def shield_on(self):
         """Get the shield status of the plane."""
@@ -117,7 +121,7 @@ class Plane:
     def smart_bombs(self):
         """Get the number of smart bombs available."""
         return self._smart_bombs
-    
+
     @property
     def using_smart_bombs(self):
         """Check if a smart bomb is being used."""
@@ -127,8 +131,6 @@ class Plane:
         """Reset the smart bomb usage status."""
         self._using_smart_bombs = False
 
-
-  
     def reset_missle(self):
         """Reset the missle to None."""
         self._missle = None
@@ -140,13 +142,13 @@ class Plane:
     def add_score(self, amount):
         """Add score"""
         self._score += amount
-        if (self._score % 1000) == 0  and self._step< self._score:
-            self._lives +=1
+        if (self._score % 1000) == 0 and self._step < self._score:
+            self._lives += 1
             self._step = self._score
 
-    def add_shield(self,amount):
+    def add_shield(self, amount):
         """Add shield"""
-        self._shield_time +=amount
+        self._shield_time += amount
 
     @property
     def lives(self):
@@ -171,6 +173,9 @@ class Plane:
         self._y = self._height // 2 - self._image.get_height() // 2
         self._world_x = self._x
         self._right = True
+        self._counter =0
+        self._jumped = False
+        self._shield_on = False
         self._scale_factor = 1.0
         self._image = pygame.transform.scale(
             self._image_right,
@@ -213,6 +218,13 @@ class Plane:
     def move(self):
         """Move the plane to the left by its speed."""
         keys = pygame.key.get_pressed()
+        self._counter += 1
+        if self._counter > 50 and self._jumped is False:
+            self._counter = 0
+
+        if self._counter > 50 and self._jumped:
+            self._jumped = False
+            self._counter = 0
 
         if keys[pygame.K_ESCAPE]:
             self.geme_over = True
@@ -228,7 +240,7 @@ class Plane:
                     self._y -= self._shield_left.get_height() // 2
                 self._shield_on = True
 
-        if keys[pygame.K_a]:
+        if keys[pygame.K_a] and not self._jumped:
             if self._smart_bombs > 0 and not self._using_smart_bombs:
                 self._smart_bombs -= 1
                 # print(f"Smart bombs left: {self._smart_bombs}")
@@ -237,9 +249,13 @@ class Plane:
         if self._exploding:
             self._shield_on = False
         if keys[pygame.K_ESCAPE]:
-            self._lives =0
+            self._lives = 0
             self.explode()
-            
+
+        if keys[pygame.K_g] and self._jumped is False and not self._exploding:
+            self._jumped = True
+            self._y = random.randint(self._image.get_height(), 600 - self._image.get_height())
+
         if keys[pygame.K_UP] and not self._exploding:
             self._y -= self._speed
         if keys[pygame.K_DOWN] and not self._exploding:
@@ -248,6 +264,14 @@ class Plane:
             self._world_x -= self._speed
         if keys[pygame.K_RIGHT] and not self._exploding:
             self._world_x += self._speed
+
+        if keys[pygame.K_f] and not self._exploding and self._missle is None and not self._jumped:
+            self._jumped = True
+            if self._speed == 20:
+                self._speed = self._saved_speed
+            else:
+                self._saved_speed = self._speed
+                self._speed = 20
 
         if keys[pygame.K_LEFT] and not self._exploding:
             self._right = True

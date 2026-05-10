@@ -109,6 +109,10 @@ class Game:
 
         self.background = None  # Will be initialized in run()
 
+        self._aliens = []
+        for _ in range(random.randint(1, 5)):
+            self._aliens.append(Alien(self._screen))
+
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
         self.x2 = 0
@@ -173,6 +177,9 @@ class Game:
                     )
             # Move meteor randomly to avoid overlap
             if loop > 100:
+                if random.randint(0, 100) % 20 == 0:
+                    for _ in range(random.randint(0, 1)):
+                        self._aliens.append(Alien(self._screen))
                 loop = 0
             for alien in self._aliens:
                 if alien is not None:
