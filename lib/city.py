@@ -38,9 +38,10 @@ class City:
                 pygame.image.load("backgrounds\\crater.png").convert_alpha()
             )
             self._cities_positions.append(first)
+            # print(f"City {index} position set to {first}.")
             first += 6000
             index += 1
-
+        #print(f"City initialized with {len(self._cities)} cities.")
     @property
     def x(self):
         """Get the current x position of the city."""
@@ -69,27 +70,30 @@ class City:
     def display(self, where_city, diff_x):
         """display a city"""
         self._diff_x = diff_x
-        index = 0
-        while index < self._max:
+        for index in range(0, self._max):
             if index >= len(self._cities_x):
                 self._cities_x.append(self._screen.get_width() // 2)
-            if where_city > self._cities_positions[index] - 1000 and where_city < (
-                self._cities_positions[index] + 1000
-            ) and self._exploded[index] is False:
-                self._which = index
-                self.draw(index, diff_x)
-                if (random.randint(0, 100) % 75 == 0) and self._diamond is None:
-                    if self._diamond is None:
-                        self._diamond = Diamond(
+            if where_city < self._cities_positions[index] - 1000:
+                self.reset(index)
+                continue
+            if where_city > self._cities_positions[index] + 1000:
+                self.reset(index)
+                continue
+            if self._exploded[index] is True:
+                self.reset(index)
+                continue
+            # print(f"City {index} is within range of the camera at position {where_city}.")
+            # print(f"city {index} at position {self._cities_positions[index]} where {where_city}.")
+            self._which = index
+            self.draw(index, diff_x)
+            if random.randint(0, 100) % 75 == 0:
+                if self._diamond is None:
+                    self._diamond = Diamond(
                             self._cities_x[index],
                             800 - self._cities[index].get_height(),
                         )
-                    else:
-                        if self._diamond.hit or self._diamond.y < 0:
-                            self._diamond = None
-            else:
-                self.reset(index)
-            index += 1
+        if self._diamond is not None and (self._diamond.hit or self._diamond.y < 0):
+            self._diamond = None
 
     def reset(self, which_city):
         """Reset the city layer's position."""

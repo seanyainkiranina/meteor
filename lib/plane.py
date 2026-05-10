@@ -189,6 +189,9 @@ class Plane:
 
     def explode(self):
         """Trigger the explosion animation for the plane."""
+        if self.shield_on:
+            self.hit_on_shield()  # Reduce shield time instead of lives
+            return
         self._exploding = True
         self._y -= self._speed * 2
         self._scale_factor += 0.5  # Start with original size
@@ -228,7 +231,7 @@ class Plane:
         if keys[pygame.K_a]:
             if self._smart_bombs > 0 and not self._using_smart_bombs:
                 self._smart_bombs -= 1
-                print(f"Smart bombs left: {self._smart_bombs}")
+                # print(f"Smart bombs left: {self._smart_bombs}")
                 self._using_smart_bombs = True
 
         if self._exploding:

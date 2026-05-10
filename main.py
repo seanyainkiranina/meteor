@@ -26,6 +26,7 @@ from lib.parallaxlayer import ParallaxLayer
 from lib.plane import Plane  # pylint: disable=[E0611,W0611]
 from lib.map import Map
 from lib.startscreen import StartScreen
+from lib.alien import Alien
 
 
 class Game:
@@ -60,7 +61,9 @@ class Game:
         self._right = False
 
         self.background = None  # Will be initialized in run()
-
+        self._aliens = []
+        for _ in range(random.randint(1, 5)):
+            self._aliens.append(Alien(self._screen))
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
         self.x2 = 0
@@ -171,10 +174,23 @@ class Game:
             # Move meteor randomly to avoid overlap
             if loop > 100:
                 loop = 0
+            for alien in self._aliens:
+                if alien is not None:
+                    alien.move(meteors, self.plane, self._aliens,self.plane.fired_missle)
+                    self._screen.blit(alien.image, (alien.x, alien.y))
+                    if alien.bullet is not None and alien.bullet.image is not None:
+                        self._screen.blit(
+                            alien.bullet.image,
+                            (alien.bullet.x, alien.bullet.y),
+                        )
+                    if alien.x < -100 or alien.x > self._screen.get_width() + 100:
+                        self._aliens.remove(alien)
+                        self._aliens.append(Alien(self._screen))
+
             for meteor in meteors:
                 if self.plane.using_smart_bombs:
                     meteor.explode()
-                
+
                 if loop % 5 == 0:
                     for mm in meteors:
                         if mm == meteor:
