@@ -1,6 +1,7 @@
 """Meteor class for the Meteor game."""
 
 import random
+from numpy._core.defchararray import index
 import pygame
 from lib.diamond import Diamond
 
@@ -17,30 +18,37 @@ class City:
         self._cities_positions = [0]
         self._screen = screen
         self._cities.append(pygame.image.load("backgrounds\\city1.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city1.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city2.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city2.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city3.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city3.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city4.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city4.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city2.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city2.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city3.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city3.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city4.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city4.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city5.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city5.png").convert_alpha())
+        self._cities.append(pygame.image.load("backgrounds\\city6.png").convert_alpha())
         self._cities.append(pygame.image.load("backgrounds\\city6.png").convert_alpha())
         self._diamond = None
         self._which = -1
         self._diff_x = 0
         self._max = len(self._cities) - 1
-        index = 0
         first = -9000
-        while index < self._max + 1:
+        for _ in range(0, self._max):
             self._exploded.append(False)
             self._cities_x.append(self._screen.get_width() // 2)
             self._craters.append(
                 pygame.image.load("backgrounds\\crater.png").convert_alpha()
             )
             self._cities_positions.append(first)
-            # print(f"City {index} position set to {first}.")
+     #       print(f"City {index} position set to {first}.")
             first += 6000
-            index += 1
         #print(f"City initialized with {len(self._cities)} cities.")
     @property
     def x(self):
@@ -67,37 +75,35 @@ class City:
         """setter for diamond"""
         self._diamond = value
 
-    def display(self, where_city, diff_x):
+    def display(self, world_x, diff_x):
         """display a city"""
         self._diff_x = diff_x
-        for index in range(0, self._max):
-            if index >= len(self._cities_x):
-                self._cities_x.append(self._screen.get_width() // 2)
-            if where_city < self._cities_positions[index] - 1000:
-                self.reset(index)
+        for i in range(0, self._max):
+            if i >= len(self._cities_x):
                 continue
-            if where_city > self._cities_positions[index] + 1000:
-                self.reset(index)
+            if world_x < self._cities_positions[i] - 2000:
                 continue
-            if self._exploded[index] is True:
-                self.reset(index)
+            if world_x > self._cities_positions[i] + 1000:
                 continue
-            # print(f"City {index} is within range of the camera at position {where_city}.")
-            # print(f"city {index} at position {self._cities_positions[index]} where {where_city}.")
-            self._which = index
-            self.draw(index, diff_x)
+            if self._exploded[i] is True:
+                self.reset(i)
+                continue
+            # print(f"City {index} is within range of the camera at position {world_x}.")
+            # print(f"city {index} at position {self._cities_positions[index]} where {world_x}.")
+            self._which = i
+            self.draw(i, world_x, diff_x)
             if random.randint(0, 100) % 75 == 0:
                 if self._diamond is None:
                     self._diamond = Diamond(
-                            self._cities_x[index],
-                            800 - self._cities[index].get_height(),
+                            self._cities_x[i],
+                            800 - self._cities[i].get_height(),
                         )
         if self._diamond is not None and (self._diamond.hit or self._diamond.y < 0):
             self._diamond = None
 
     def reset(self, which_city):
         """Reset the city layer's position."""
-        if which_city > self._max:
+        if which_city < self._max:
             self._cities_x[which_city] = self._screen.get_width() // 2
 
     def hit_meteor_check(self, meteor):
@@ -122,19 +128,15 @@ class City:
             self._cities[self._which] = self._craters[self._which]
         return True
 
-    def draw(self, which_city, increment=0):
+    def draw(self, which_city, world_x, increment=0):
         """Draw the city layers on the screen."""
         if which_city <= self._max:
             self._which = which_city
-            self._cities_x[which_city] += increment
-            self._screen.blit(
-                self._cities[which_city],
-                (
-                    self._cities_x[which_city],
-                    self._screen.get_height()
-                    - self._cities[which_city].get_height()
-                    + 5,
-                ),
-            )
+         #   self._cities_x[which_city] += increment
+         #   print(f"Drawing city {which_city} at x position {self._cities_x[which_city]} with increment {increment}.")
+            screen_x = self._cities_positions[which_city] - world_x + self._screen.get_width() // 2 
+            self._screen.blit(self._cities[which_city], (screen_x, self._screen.get_height() - self._cities[which_city].get_height() + 5))
+        #       print(f"City {which_city} drawn at screen x position {screen_x}.")
+            self._cities_x[which_city]= screen_x
             return True
         return False

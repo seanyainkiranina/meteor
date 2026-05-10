@@ -71,6 +71,16 @@ class Alien:
         alien_rect = self._image.get_rect(topleft=(self._x, self._y))
         change_direction_chance = random.randint(0, 100) < 10  # 10% chance to change direction
 
+        if plane.using_smart_bombs:
+             # Check if the alien is within the smart bomb's blast radius
+            smart_bomb_radius = 200  # Example radius for the smart bomb
+            distance_to_alien = ((self._x - plane.x) ** 2 + (self._y - plane.y) ** 2) ** 0.5
+            if distance_to_alien <= smart_bomb_radius:
+                self._image = self._explosion
+                self._visible = False
+                plane.add_score(150)  # Award points for hitting the alien with a smart bomb
+                return
+
         if plane_rect.colliderect(alien_rect) and self._visible:
             if plane.shield_on:
                 plane.hit_on_shield()  # Reduce shield time instead of lives
