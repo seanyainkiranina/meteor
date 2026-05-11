@@ -14,7 +14,7 @@ class StartScreen:
 
     def __init__(self, screen):
         self._screen = screen
-        self._font = pygame.font.SysFont("consolas", 19)
+        self._font = pygame.font.SysFont("consolas", 23)
         self._starting = 1
         self._high_score = -1000
         self._score_board = Score()

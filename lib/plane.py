@@ -264,6 +264,7 @@ class Plane:
         if keys[pygame.K_a] and not self._jumped:
             if self._smart_bombs > 0 and not self._using_smart_bombs:
                 self._smart_bombs -= 1
+                self._jumped = True
                 # print(f"Smart bombs left: {self._smart_bombs}")
                 self._using_smart_bombs = True
 
