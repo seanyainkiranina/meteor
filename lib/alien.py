@@ -97,7 +97,12 @@ class Alien:
             self._visible = False
             return
 
-
+        if change_direction_chance and self._right:
+            self._right = False
+        else:
+            if change_direction_chance and not self._right:
+                self._right = True    
+    
         # Fire logic and collisions use world coordinates
     
         # Movement in world space

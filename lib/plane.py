@@ -236,6 +236,11 @@ class Plane:
         else:
             self.reset()  # Reset the plane after the explosion animation is complete
 
+    def teleport(self):
+        """ Jump the plane """
+        self._y = random.randint(self._image.get_height(), 600 - self._image.get_height())
+        self._world_x = random.randint(self._world_x-self._width, self._world_x+self._width)
+
     def move(self):
         """Move the plane to the left by its speed."""
         keys = pygame.key.get_pressed()

@@ -1,6 +1,7 @@
 """Map class for the parallax scrolling game."""
 
 from lib.city import City
+from lib.stargate import Stargate
 
 
 class Map:
@@ -10,6 +11,13 @@ class Map:
         self._city = City(screen)
         self._lastx = 0
         self._diamond = None
+        self._stargate = Stargate(screen)
+        self._stargate_shown = False
+
+    @property
+    def stargate(self):
+        """stargates are owned by the map"""
+        return self._stargate
 
     @property
     def diamond(self):
@@ -41,6 +49,11 @@ class Map:
         """get city"""
         return self._city
 
+    @property
+    def starget_shown(self):
+        """ check if star gate is shown"""
+        return self._stargate_shown
+
     def draw(self, camera_x, lastx):
         """draw city"""
         if self._lastx == 0:
@@ -48,6 +61,7 @@ class Map:
         diff = self._lastx - lastx
         self._lastx = lastx  # Calculate the difference in camera position
         self._city.display(camera_x, diff)
+        self._stargate_shown = self._stargate.display(camera_x, diff)
         self._diamond = self._city.diamond
         if self._diamond is not None:
             self._diamond.x += diff
