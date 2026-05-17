@@ -15,7 +15,8 @@ class Plane:
         self._saved_speed = speed
         self._smart_bombs = 3
         self._using_smart_bombs = False
-        self._counter =0
+        self._counter = 0
+        self._carrying_person = False
         self._step = 0
         self._game_over = False
         self._score = 0
@@ -36,11 +37,18 @@ class Plane:
         self._shield_right = pygame.image.load(
             "player\\shield_plane_right.png"
         ).convert_alpha()
+
         self._org_width, self._org_height = self._image_left.get_size()
         self._scale_factor = 4.0  # 2x bigger
         self._image_right = pygame.image.load(
             filename_right
         ).convert_alpha()  # Pygame surface for the plane facing right
+        self._image_right_person = pygame.image.load(
+            "player\\plane_right_person.png"
+        ).convert_alpha()
+        self._image_person = pygame.image.load(
+            "player\\plane_person.png"
+        ).convert_alpha()
         self._image = self._image_right  # Pygame surface for the plane
         self._missle = None  # Missle object representing the plane's missle
         self._explosions = []  # List to hold explosion objects when the plane is hit
@@ -70,6 +78,16 @@ class Plane:
         self._reset = False
 
     @property
+    def carrying_person(self):
+        """get carrying person"""
+        return self._carrying_person
+
+    @carrying_person.setter
+    def carrying_person(self, value):
+        """set carrying person"""
+        self._carrying_person = value
+
+    @property
     def counter(self):
         """Get the counter value."""
         return self._counter
@@ -78,7 +96,7 @@ class Plane:
     def resetting(self):
         """Check if the plane needs to be reset after an explosion."""
         return self._reset
-    
+
     @resetting.setter
     def resetting(self, value):
         """Set the resetting status of the plane."""
@@ -170,6 +188,7 @@ class Plane:
     def speed(self):
         """Speed the plane is flying."""
         return self._speed
+
     @property
     def lives(self):
         """get lives"""
@@ -194,10 +213,11 @@ class Plane:
         self._y = self._height // 2 - self._image.get_height() // 2
         self._world_x = self._x
         self._right = True
-        self._counter =0
+        self._counter = 0
         self._jumped = False
         self._shield_on = False
         self._scale_factor = 1.0
+        self._carrying_person = False
         self._image = pygame.transform.scale(
             self._image_right,
             (
@@ -237,9 +257,13 @@ class Plane:
             self.reset()  # Reset the plane after the explosion animation is complete
 
     def teleport(self):
-        """ Jump the plane """
-        self._y = random.randint(self._image.get_height(), 600 - self._image.get_height())
-        self._world_x = random.randint(self._world_x-self._width, self._world_x+self._width)
+        """Jump the plane"""
+        self._y = random.randint(
+            self._image.get_height(), 600 - self._image.get_height()
+        )
+        self._world_x = random.randint(
+            self._world_x - self._width, self._world_x + self._width
+        )
 
     def move(self):
         """Move the plane to the left by its speed."""
@@ -261,7 +285,7 @@ class Plane:
             self._shield_on = False
 
         if keys[pygame.K_s]:
-            if self._shield_time > 0:
+            if self._shield_time > 0 and self._carrying_person is False:
                 if not self._shield_on:
                     self._y -= self._shield_left.get_height() // 2
                 self._shield_on = True
@@ -281,8 +305,12 @@ class Plane:
 
         if keys[pygame.K_g] and self._jumped is False and not self._exploding:
             self._jumped = True
-            self._y = random.randint(self._image.get_height(), 600 - self._image.get_height())
-            self._world_x = random.randint(self._world_x-self._width, self._world_x+self._width)
+            self._y = random.randint(
+                self._image.get_height(), 600 - self._image.get_height()
+            )
+            self._world_x = random.randint(
+                self._world_x - self._width, self._world_x + self._width
+            )
 
         if keys[pygame.K_UP] and not self._exploding:
             self._y -= self._speed
@@ -293,7 +321,12 @@ class Plane:
         if keys[pygame.K_RIGHT] and not self._exploding:
             self._world_x += self._speed
 
-        if keys[pygame.K_f] and not self._exploding and self._missle is None and not self._jumped:
+        if (
+            keys[pygame.K_f]
+            and not self._exploding
+            and self._missle is None
+            and not self._jumped
+        ):
             self._jumped = True
             if self._speed == 20:
                 self._speed = self._saved_speed
@@ -348,7 +381,13 @@ class Plane:
                     self._image = self._shield_right
             else:
                 if self._right:
-                    self._image = self._image_right
+                    if self._carrying_person:
+                        self._image = self._image_right_person
+                    else:
+                        self._image = self._image_right
 
                 if not self._right:
-                    self._image = self._image_left
+                    if self._carrying_person:
+                        self._image = self._image_person
+                    else:
+                        self._image = self._image_left

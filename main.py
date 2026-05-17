@@ -100,8 +100,13 @@ class Game:
         """set screen"""
         self._screen = value
 
+    @property
+    def number_aliens(self):
+        """return number of aliens"""
+        return round((3 + self.planet) // random.randint(1, 3), 0) + 1
+
     def softreset(self):
-        """ used to change worlds"""
+        """used to change worlds"""
         color_black = (0, 0, 0)
         self._screen.fill(color_black)
         self.speed1 = 1
@@ -111,7 +116,7 @@ class Game:
         self._bullets.clear()
         self.background = None  # Will be initialized in run()
         self._aliens = []
-        for _ in range(random.randint(1, 3 + self.planet)):
+        for _ in range(random.randint(1, self.number_aliens)):
             self._aliens.append(Alien(self._screen, self.plane))
 
         # X positions for each layer (two copies for seamless looping)
@@ -127,7 +132,6 @@ class Game:
             ]
         )
 
-
     def reset(self):
         """restart game"""
         color_black = (0, 0, 0)
@@ -141,7 +145,7 @@ class Game:
 
         self.background = None  # Will be initialized in run()
         self._aliens = []
-        for _ in range(random.randint(1, 3 + self.planet)):
+        for _ in range(random.randint(1, self.number_aliens)):
             self._aliens.append(Alien(self._screen, self.plane))
 
         # X positions for each layer (two copies for seamless looping)
@@ -190,7 +194,10 @@ class Game:
                     running = False
 
             # Update positions
-
+            if self.plane.y==0:
+                if self.plane.carrying_person:
+                    self.plane.add_score(200)
+                    self.plane.carrying_person = False
             # Draw layers (two copies each for looping)
             if self.plane.lives <= 0:
                 running = False
@@ -213,8 +220,8 @@ class Game:
                         None  # Remove missle if it goes off-screen
                     )
             # Move meteor randomly to avoid overlap
-            if random.randint(0, 100) % 20 == 0 and len(meteors) < (3 + self.planet):
-                for _ in range(random.randint(0, 5 + + self.planet)):
+            if random.randint(0, 100) % 20 == 0 and len(meteors) < (self.number_aliens):
+                for _ in range(random.randint(0, self.number_aliens)):
                     meteors.append(
                         Meteor(
                             self._screen.get_width(),
@@ -222,7 +229,7 @@ class Game:
                             self.plane.world_x,
                         )
                     )
-                if len(self._aliens) < (3 + self.planet):
+                if len(self._aliens) < (self.number_aliens):
                     for _ in range(random.randint(0, 1)):
                         self._aliens.append(Alien(self._screen, self.plane))
             loop = 0
@@ -267,21 +274,23 @@ class Game:
                                 mm.explode()
 
                 self._screen.blit(meteor.asteroid, (meteor.x, meteor.y))
+                if loop % 20 == 0:
+                    map_city.people.reborn()
                 meteor.move(self.plane)
                 if map_city.city.hit_meteor_check(meteor):
-                    self.plane.add_score(-100)
+                    self.plane.add_score(-100 * self.number_aliens)
                 if meteor.crash_check(self.plane, True):
                     self.plane.explode()
                     meteor.reset()
                 if meteor.crash_check(self.plane, False):
                     meteor.explode()
-                    self.plane.add_score(3 * self.planet)
+                    self.plane.add_score(3 * self.number_aliens)
                     self.plane.hit_on_shield()
                 if self.plane.fired_missle and self.plane.fired_missle.hit_check(
                     meteor
                 ):
                     meteor.explode()
-                    self.plane.add_score(10 * self.planet)
+                    self.plane.add_score(10 * self.number_aliens)
                     self.plane.fired_missle = None  # Remove missle after hit
                     if len(meteor.asteroids) > 0:
                         new_meteors.append(
@@ -306,18 +315,21 @@ class Game:
             if loop % 20 == 0:
                 self.plane.used_smart_bombs()  # Reset smart bomb usage status
             map_city.draw(self.plane.world_x, lastx)
+            if map_city.ptarget_shown:
+                if map_city.people.crash_check(self.plane):
+                    self.plane.add_score(100)
+                    self.plane.carrying_person = True
             if map_city.starget_shown:
                 if map_city.stargate.crash_check(self.plane):
-                    self.planet +=1
-                    if self.planet >10:
+                    self.planet += 1
+                    if self.planet > 10:
                         self.planet = 1
                     self.layer3 = pygame.image.load(
-                    f"backgrounds\\layer{self.planet}.png"
+                        f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()
                     self.softreset()  # foreground
                     self.plane.teleport()
 
-     
             if (
                 map_city.diamond is not None
                 and map_city.diamond.hit is False
@@ -336,7 +348,12 @@ class Game:
                         map_city.diamond = None
 
             lastx = self.plane.world_x
-            score_text = f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} Score:{self.plane.score} Lives:{self.plane.lives} Meteors:{len(meteors)} Aliens:{len(self._aliens)} Planet:{self.planet}"
+            score_text = (
+                f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} "
+            )
+            score_text += f"Score:{self.plane.score} Lives:{self.plane.lives} "
+            score_text += f"Meteors:{len(meteors)} "
+            score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet}"
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )

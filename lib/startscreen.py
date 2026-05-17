@@ -41,7 +41,8 @@ class StartScreen:
         instruct.append("s for shields on d for shields off")
         instruct.append("f to toggle speed burst, g for hyper space jump")
         instruct.append("a to fire smart bomb ")
-        instruct.append("extra life after every 1000 points")
+        instruct.append("Bringing a person to the top of the screen 200 pts")
+        instruct.append("Extra life after every 1000 points")
         instruct.append("Esc to exit")
         instruct.append("Anykey to Start")
         return instruct

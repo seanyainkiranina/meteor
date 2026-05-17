@@ -2,6 +2,7 @@
 
 from lib.city import City
 from lib.stargate import Stargate
+from lib.people import People
 
 
 class Map:
@@ -13,7 +14,12 @@ class Map:
         self._diamond = None
         self._stargate = Stargate(screen)
         self._stargate_shown = False
+        self._people = People(screen)
 
+    @property
+    def people(self):
+        """ peoples"""
+        return self._people
     @property
     def stargate(self):
         """stargates are owned by the map"""
@@ -54,6 +60,11 @@ class Map:
         """ check if star gate is shown"""
         return self._stargate_shown
 
+    @property
+    def ptarget_shown(self):
+        """ Check if person is shown """
+        return self._people.visible
+
     def draw(self, camera_x, lastx):
         """draw city"""
         if self._lastx == 0:
@@ -61,6 +72,7 @@ class Map:
         diff = self._lastx - lastx
         self._lastx = lastx  # Calculate the difference in camera position
         self._city.display(camera_x, diff)
+        self._people.display(camera_x,diff)
         self._stargate_shown = self._stargate.display(camera_x, diff)
         self._diamond = self._city.diamond
         if self._diamond is not None:
