@@ -300,6 +300,9 @@ class Game:
             meteors.extend(new_meteors)
             new_meteors.clear()  # Clear the list for the next frame
             for meteor in meteors:
+                if map_city.ptarget_shown:
+                    if map_city.people.impact_check(meteor):
+                        self.plane.add_score(-200)
                 if meteor.y > self._screen.get_height():
                     new_meteors.append(meteor)
 

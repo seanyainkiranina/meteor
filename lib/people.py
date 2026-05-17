@@ -61,22 +61,32 @@ class People:
     def which(self):
         """which city"""
         return self._which
+    
+    def impact_check(self, rock):
+        """Check for collision with the meteor.""" 
+        rock_rect = rock.asteroid.get_rect(topleft=(rock.x, rock.y))
+        person_rect = self._people[self._which].get_rect(topleft=(self.x, self.y))
+        checked = rock_rect.colliderect(person_rect)
+        if checked:
+            self._display[self._which] = False
+        return checked
 
-    def crash_check(self, plane, handle_shield_hit=False):
-        """Check for collision with the player's plane."""
-        if plane.shield_on and handle_shield_hit:
+
+    def crash_check(self, plane):
+        """Check for plane """
+        if plane.shield_on:
             return False  # No collision if the shield is on
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         person_rect = self._people[self._which].get_rect(topleft=(self.x, self.y))
         checked = plane_rect.colliderect(person_rect)
-        if checked: 
+        if checked:
             self._display[self._which] = False
         return checked
 
     def reborn(self):
         """ randomly show an person """
         i = random.randint(0,self._max)
-        x = random.randint(0,100)
+        x = random.randint(0,1000)
         if i<len(self._display) and x<1:
             self._display[i] = True
 
