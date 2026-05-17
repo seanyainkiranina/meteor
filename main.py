@@ -100,6 +100,34 @@ class Game:
         """set screen"""
         self._screen = value
 
+    def softreset(self):
+        """ used to change worlds"""
+        color_black = (0, 0, 0)
+        self._screen.fill(color_black)
+        self.speed1 = 1
+        self.speed2 = 2
+        self.speed3 = 4
+        screen_width, screen_height = 800, 600
+        self._bullets.clear()
+        self.background = None  # Will be initialized in run()
+        self._aliens = []
+        for _ in range(random.randint(1, 5 + self.planet)):
+            self._aliens.append(Alien(self._screen, self.plane))
+
+        # X positions for each layer (two copies for seamless looping)
+        self.x1 = 0
+        self.x2 = 0
+        self.x3 = 0
+        self.camera = Camera(screen_width)
+        self.background = ParallaxBackground(
+            [
+                ParallaxLayer(self.layer1, 0.2),  # far
+                ParallaxLayer(self.layer2, 0.5),  # mid
+                ParallaxLayer(self.layer3, 1.0),  # foreground
+            ]
+        )
+
+
     def reset(self):
         """restart game"""
         color_black = (0, 0, 0)
@@ -286,7 +314,7 @@ class Game:
                     self.layer3 = pygame.image.load(
                     f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()
-                    self.reset()  # foreground
+                    self.softreset()  # foreground
                     self.plane.teleport()
 
      
