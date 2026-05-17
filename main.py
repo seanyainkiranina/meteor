@@ -309,7 +309,7 @@ class Game:
             if map_city.starget_shown:
                 if map_city.stargate.crash_check(self.plane):
                     self.planet +=1
-                    if self.planet >7:
+                    if self.planet >9:
                         self.planet = 1
                     self.layer3 = pygame.image.load(
                     f"backgrounds\\layer{self.planet}.png"
