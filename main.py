@@ -111,7 +111,7 @@ class Game:
         self._bullets.clear()
         self.background = None  # Will be initialized in run()
         self._aliens = []
-        for _ in range(random.randint(1, 5 + self.planet)):
+        for _ in range(random.randint(1, 3 + self.planet)):
             self._aliens.append(Alien(self._screen, self.plane))
 
         # X positions for each layer (two copies for seamless looping)
@@ -141,7 +141,7 @@ class Game:
 
         self.background = None  # Will be initialized in run()
         self._aliens = []
-        for _ in range(random.randint(1, 5 + self.planet)):
+        for _ in range(random.randint(1, 3 + self.planet)):
             self._aliens.append(Alien(self._screen, self.plane))
 
         # X positions for each layer (two copies for seamless looping)
@@ -213,7 +213,7 @@ class Game:
                         None  # Remove missle if it goes off-screen
                     )
             # Move meteor randomly to avoid overlap
-            if random.randint(0, 100) % 20 == 0 and len(meteors) < (5 + self.planet):
+            if random.randint(0, 100) % 20 == 0 and len(meteors) < (3 + self.planet):
                 for _ in range(random.randint(0, 5 + + self.planet)):
                     meteors.append(
                         Meteor(
@@ -222,7 +222,7 @@ class Game:
                             self.plane.world_x,
                         )
                     )
-                if len(self._aliens) < (5 + self.planet):
+                if len(self._aliens) < (3 + self.planet):
                     for _ in range(random.randint(0, 1)):
                         self._aliens.append(Alien(self._screen, self.plane))
             loop = 0
@@ -275,7 +275,7 @@ class Game:
                     meteor.reset()
                 if meteor.crash_check(self.plane, False):
                     meteor.explode()
-                    self.plane.add_score(5 * self.planet)
+                    self.plane.add_score(3 * self.planet)
                     self.plane.hit_on_shield()
                 if self.plane.fired_missle and self.plane.fired_missle.hit_check(
                     meteor
@@ -309,7 +309,7 @@ class Game:
             if map_city.starget_shown:
                 if map_city.stargate.crash_check(self.plane):
                     self.planet +=1
-                    if self.planet >9:
+                    if self.planet >10:
                         self.planet = 1
                     self.layer3 = pygame.image.load(
                     f"backgrounds\\layer{self.planet}.png"
