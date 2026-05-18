@@ -60,6 +60,7 @@ class Game:
         self.speed1 = 1
         self.speed2 = 2
         self.speed3 = 4
+        self.map_city = None
 
         self._right = False
 
@@ -121,6 +122,7 @@ class Game:
         self._bullets.clear()
         self.background = None  # Will be initialized in run()
         self._aliens = []
+        self._mutants =[]
         for _ in range(random.randint(1, self.number_aliens)):
             self._aliens.append(Alien(self._screen, self.plane))
 
@@ -128,6 +130,8 @@ class Game:
         self.x1 = 0
         self.x2 = 0
         self.x3 = 0
+        if self.map_city is not None:
+            self.map_city.people.ressurection()
         self.camera = Camera(screen_width)
         self.background = ParallaxBackground(
             [
@@ -178,7 +182,7 @@ class Game:
     def run(self):
         """Main game loop."""
         lastx = self.plane.world_x
-        map_city = Map(self._screen)
+        self.map_city = Map(self._screen)
         meteors = [
             Meteor(
                 self._screen.get_width(), self._screen.get_height(), self.plane.world_x
@@ -263,7 +267,7 @@ class Game:
                     if hunting_set is False:
                         if alien.hunting is True:
                             hunting_set = True
-                            if map_city.people.visible is False:
+                            if self.map_city.people.visible is False:
                                 alien.hunting=False
                                 hunting_set= False
 
@@ -272,14 +276,15 @@ class Game:
                         self._aliens.append(Alien(self._screen, self.plane))
                     if alien.y <= 0 and alien.carrying_person:
                         self._aliens.remove(alien)
-                        self._mutants.append(Mutant(self._screen, self.plane))
-            if map_city.people.visible:
+                        if len(self._mutants)<5:
+                            self._mutants.append(Mutant(self._screen, self.plane))
+            if self.map_city.people.visible:
                 if hunting_set is False:
                     alien = random.choice(self._aliens)
                     if alien is not None:
                         hunting_set = True
                         alien.hunting=True
-                        alien.target = map_city.people.get_person()
+                        alien.target = self.map_city.people.get_person()
 
 
             for b in self._bullets:
@@ -313,9 +318,9 @@ class Game:
 
                 self._screen.blit(meteor.asteroid, (meteor.x, meteor.y))
                 if loop % 20 == 0:
-                    map_city.people.reborn()
+                    self.map_city.people.reborn()
                 meteor.move(self.plane)
-                if map_city.city.hit_meteor_check(meteor):
+                if self.map_city.city.hit_meteor_check(meteor):
                     self.plane.add_score(-100 * self.number_aliens)
                 if meteor.crash_check(self.plane, True):
                     self.plane.explode()
@@ -338,8 +343,8 @@ class Game:
             meteors.extend(new_meteors)
             new_meteors.clear()  # Clear the list for the next frame
             for meteor in meteors:
-                if map_city.ptarget_shown:
-                    if map_city.people.impact_check(meteor):
+                if self.map_city.ptarget_shown:
+                    if self.map_city.people.impact_check(meteor):
                         self.plane.add_score(-200)
                 if meteor.y > self._screen.get_height():
                     new_meteors.append(meteor)
@@ -355,13 +360,13 @@ class Game:
 
             if loop % 20 == 0:
                 self.plane.used_smart_bombs()  # Reset smart bomb usage status
-            map_city.draw(self.plane.world_x, lastx)
-            if map_city.ptarget_shown:
-                if map_city.people.crash_check(self.plane):
+            self.map_city.draw(self.plane.world_x, lastx)
+            if self.map_city.ptarget_shown:
+                if self.map_city.people.crash_check(self.plane):
                     self.plane.add_score(100)
                     self.plane.carrying_person = True
-            if map_city.starget_shown:
-                if map_city.stargate.crash_check(self.plane):
+            if self.map_city.starget_shown:
+                if self.map_city.stargate.crash_check(self.plane):
                     self.planet += 1
                     if self.planet > 10:
                         self.planet = 1
@@ -372,21 +377,21 @@ class Game:
                     self.plane.teleport()
 
             if (
-                map_city.diamond is not None
-                and map_city.diamond.hit is False
-                and map_city.diamond.image is not None
+                self.map_city.diamond is not None
+                and self.map_city.diamond.hit is False
+                and self.map_city.diamond.image is not None
             ):
                 self._screen.blit(
-                    map_city.diamond.image,
-                    (map_city.diamond.x, map_city.diamond.y),
+                    self.map_city.diamond.image,
+                    (self.map_city.diamond.x, self.map_city.diamond.y),
                 )
-                map_city.diamond.move()
+                self.map_city.diamond.move()
                 if self.plane is not None and self.plane.image is not None:
-                    if map_city.diamond.hit_player_check(self.plane):
+                    if self.map_city.diamond.hit_player_check(self.plane):
                         self.plane.add_shield(100)
-                        map_city.diamond.hit = True
-                        map_city.diamond.y = 600
-                        map_city.diamond = None
+                        self.map_city.diamond.hit = True
+                        self.map_city.diamond.y = 600
+                        self.map_city.diamond = None
 
             lastx = self.plane.world_x
             score_text = (
@@ -395,7 +400,7 @@ class Game:
             score_text += f"Score:{self.plane.score} Lives:{self.plane.lives} "
             score_text += f"Meteors:{len(meteors)} "
             score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet} "
-            score_text += f"Rescues:{map_city.people.number_of_people()}"
+            score_text += f"Rescues:{self.map_city.people.number_of_people()}"
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )

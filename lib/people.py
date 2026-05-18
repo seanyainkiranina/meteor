@@ -46,6 +46,11 @@ class People:
     def number_of_people(self):
         """get number of people"""
         return self._display.count(True)
+    
+    def ressurection(self):
+        """bring them all back"""
+        for index,_ in enumerate(self._display):
+            self._display[index] = True
 
     @property
     def y(self):

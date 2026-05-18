@@ -188,7 +188,6 @@ class Alien:
                         self._person.visible = False
                         self._carrying_person = True
                         self._hunting = False
-                        plane.add_score(-400)
             else:
                 self._hunting = False
             return
