@@ -103,7 +103,10 @@ class Game:
     @property
     def number_aliens(self):
         """return number of aliens"""
-        return round((3 + self.planet) // random.randint(1, 3), 0) + 1
+        i_max = round((3 + self.planet) // random.randint(1, 3), 0) + 1
+        if i_max>=15:
+            i_max =10
+        return i_max
 
     def softreset(self):
         """used to change worlds"""
@@ -186,7 +189,9 @@ class Game:
         self._bullets = []
         bullets_to_remove = []
         bullet = None
+        hunting_set = False
         while running:
+            hunting_set = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
@@ -241,9 +246,25 @@ class Game:
                     if bullet is not None and bullet.image is not None:
                         self._bullets.append(bullet)
                     self._screen.blit(alien.image, (alien.x, alien.y))
+                    if hunting_set is False:
+                        if alien.hunting is True:
+                            hunting_set = True
+                            if map_city.people.visible is False:
+                                alien.hunting=False
+                                hunting_set= False
+
                     if alien.x < -3000 or alien.x > 3000:
                         self._aliens.remove(alien)
                         self._aliens.append(Alien(self._screen, self.plane))
+            if map_city.people.visible:
+                if hunting_set is False:
+                    alien = random.choice(self._aliens)
+                    if alien is not None:
+                        hunting_set = True
+                        alien.hunting=True
+                        alien.target = map_city.people.get_person()
+
+
             for b in self._bullets:
                 if b is not None and b.image is not None:
                     self._screen.blit(b.image, (b.x, b.y))
@@ -356,7 +377,8 @@ class Game:
             )
             score_text += f"Score:{self.plane.score} Lives:{self.plane.lives} "
             score_text += f"Meteors:{len(meteors)} "
-            score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet}"
+            score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet} "
+            score_text += f"Rescues:{map_city.people.number_of_people()}"
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )

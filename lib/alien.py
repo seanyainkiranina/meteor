@@ -5,22 +5,35 @@ import pygame
 
 from lib.meteor import Meteor  # pylint: disable=[E0611,W0611]
 from lib.bullet import Bullet  # pylint: disable=[E0611,W0611]
+from lib.people import People
+
 
 class Alien:
-    """ Alien class represents an alien that moves across the screen and can fire bullets at the player's plane."""
-    def __init__(self, screen,plane):
+    """Alien class represents an alien that moves across the screen and can fire bullets at the player's plane."""
+
+    def __init__(self, screen, plane):
         self._screen = screen
         self._speed = 1
+        self._hunting = False
         self._bullet = None
         self._right = False
         self._insights = False
         self._visible = True
-        startx = random.randint(0, 300)
         self._speed = random.randint(2, 10)
         self._image_left = pygame.image.load("player\\alien.png").convert_alpha()
         self._image_right = pygame.image.load("player\\alien_right.png").convert_alpha()
-        self._explosion = pygame.image.load("player\\alien_explosion.png").convert_alpha()
+        self._image_left_person = pygame.image.load(
+            "player\\alien_person.png"
+        ).convert_alpha()
+        self._image_right_person = pygame.image.load(
+            "player\\alien_right_person.png"
+        ).convert_alpha()
+        self._explosion = pygame.image.load(
+            "player\\alien_explosion.png"
+        ).convert_alpha()
         self._explosion_frames = 6
+        self._person = None
+        self._carrying_person = False
 
         # Random start direction and world position
         if random.randint(0, 100) % 2 == 0:
@@ -28,11 +41,41 @@ class Alien:
             self._world_x = -2000 + plane.world_x
             self._image = self._image_right
         else:
-            self._world_x =  2000 + plane.world_x
+            self._world_x = 2000 + plane.world_x
             self._image = self._image_left
 
         self._y = random.randint(self._image.get_height(), screen.get_height() // 2)
         self._x = self._world_x  # initial screen projection
+
+    @property
+    def carrying_person(self):
+        """is carrying person"""
+        return self._carrying_person
+
+    @carrying_person.setter
+    def carrying_person(self, value):
+        """set carrying person to value"""
+        self._carrying_person = value
+
+    @property
+    def target(self):
+        """Get target"""
+        return self._person
+
+    @target.setter
+    def target(self, value):
+        """set target"""
+        self._person = value
+
+    @property
+    def hunting(self):
+        """return if hunting"""
+        return self._hunting
+
+    @hunting.setter
+    def hunting(self, value):
+        """Hunting for people"""
+        self._hunting = value
 
     @property
     def x(self):
@@ -53,6 +96,7 @@ class Alien:
     def bullet(self):
         """Get the current bullet of the alien."""
         return self._bullet
+
     @bullet.setter
     def bullet(self, value):
         """Set the bullet of the alien."""
@@ -63,26 +107,34 @@ class Alien:
         lookahead_distance = 50
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         alien_rect = self._image.get_rect(topleft=(self._x, self._y))
-        change_direction_chance = random.randint(0, 100) < 4  # 4% chance to change direction
+        change_direction_chance = (
+            random.randint(0, 100) < 4
+        )  # 4% chance to change direction
         # Fire logic and collisions use world coordinates
         fire = random.randint(0, 100) < 50
-    
 
         # Convert world position to screen position
         self._x = self._world_x - plane.world_x + self._screen.get_width() // 2
 
         # Skip drawing if off-screen
-        if self._x < -self._image.get_width() or self._x > self._screen.get_width() + self._image.get_width():
+        if (
+            self._x < -self._image.get_width()
+            or self._x > self._screen.get_width() + self._image.get_width()
+        ):
             return
 
         if plane.using_smart_bombs:
-             # Check if the alien is within the smart bomb's blast radius
+            # Check if the alien is within the smart bomb's blast radius
             smart_bomb_radius = 200  # Example radius for the smart bomb
-            distance_to_alien = ((self._x - plane.x) ** 2 + (self._y - plane.y) ** 2) ** 0.5
+            distance_to_alien = (
+                (self._x - plane.x) ** 2 + (self._y - plane.y) ** 2
+            ) ** 0.5
             if distance_to_alien <= smart_bomb_radius:
                 self._image = self._explosion
                 self._visible = False
-                plane.add_score(150)  # Award points for hitting the alien with a smart bomb
+                plane.add_score(
+                    150
+                )  # Award points for hitting the alien with a smart bomb
                 return
 
         if plane_rect.colliderect(alien_rect) and self._visible:
@@ -90,7 +142,9 @@ class Alien:
                 plane.hit_on_shield()  # Reduce shield time instead of lives
                 self._image = self._explosion
                 self._visible = False
-                plane.add_score(50)  # Award points for hitting the alien with the shield on
+                plane.add_score(
+                    50
+                )  # Award points for hitting the alien with the shield on
                 return
             plane.explode()
             self._image = self._explosion
@@ -101,10 +155,10 @@ class Alien:
             self._right = False
         else:
             if change_direction_chance and not self._right:
-                self._right = True    
-    
+                self._right = True
+
         # Fire logic and collisions use world coordinates
-    
+
         # Movement in world space
         if self._right:
             self._world_x += self._speed
@@ -116,6 +170,28 @@ class Alien:
             self._image = self._image_left
             if abs(plane.x - self._x) < 50:
                 self._insights = True
+
+        if self._hunting and self._carrying_person is False:
+            if self._person is not None:
+                if self._person.x < self.x:
+                    self._right = False
+                else:
+                    self._right = True
+                if self._y < self._person.y:
+                    self._y += self._speed
+                if self._x > self._person.x - 2:
+                    self._x -= self._speed
+                if self._x < self._person.x - 3:
+                    self._x += self._speed
+                if self._x > self._person.x - 13 and self._x < self._person.x + 13:
+                    if self._y > self._person.y - 26 and self._y < self._person.y + 26:
+                        self._person.visible = False
+                        self._carrying_person = True
+                        self._hunting = False
+                        plane.add_score(-400)
+            else:
+                self._hunting = False
+            return
 
         # Bullet creation uses world coordinates
         if fire and self._bullet is None and self._insights:
@@ -129,7 +205,6 @@ class Alien:
                 if self._bullet.image is not None:
                     self._bullet.fire(plane)
                     return self._bullet
-
 
         if self._bullet is not None and self._bullet.image is None:
             self._bullet = None  # Remove bullet if it goes off-screen
@@ -165,8 +240,8 @@ class Alien:
             self._visible = True
             return
 
-    #    if self._visible is False:
-    #        return
+        #    if self._visible is False:
+        #        return
 
         if self._bullet is not None and plane.resetting is True:
             self._bullet = None  # Remove bullet after hitting the plane
@@ -175,14 +250,26 @@ class Alien:
         if self._right:
             self._x += self._speed
             self._image = self._image_right
-            if self._x < plane.x and plane.y < self._y+50 and plane.y > self._y-50:
+            if self._carrying_person:
+                self._image = self._image_right_person
+            if self._x < plane.x and plane.y < self._y + 50 and plane.y > self._y - 50:
                 self._insights = True
         else:
             self._x -= self._speed
             self._image = self._image_left
+            if self._carrying_person:
+                self._image = self._image_left_person
             lookahead_distance = -lookahead_distance
-            if self._x > plane.x and plane.y < self._y+50 and plane.y > self._y-50:
+            if (
+                self._x > plane.x
+                and plane.y < self._y + 50
+                and plane.y > self._y - 50
+                and self._hunting is False
+            ):
                 self._insights = True
+
+        if self._carrying_person:
+            self._y -= self._speed
 
         for a in aliens:
             if a is not self:
@@ -215,22 +302,28 @@ class Alien:
                     self._image.get_height(),
                 )
             ):
-                if meteor.y < self._y and change_direction_chance:
+                if (
+                    meteor.y < self._y
+                    and change_direction_chance
+                    and self._hunting is False
+                ):
                     self._y += 1
                     break
-                if meteor.y > self._y and change_direction_chance:
+                if (
+                    meteor.y > self._y
+                    and change_direction_chance
+                    and self._hunting is False
+                ):
                     self._y -= 1
                     break
-        if change_direction_chance and self._insights:
+        if change_direction_chance and self._insights and self._hunting is False:
             if plane.y < self._y:
                 self._y -= 1
             if plane.y > self._y:
                 self._y += 1
 
-
         # Draw alien
         if self._visible:
             self._screen.blit(self._image, (self._x, self._y))
 
-  
         return None

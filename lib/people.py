@@ -1,4 +1,5 @@
 """People class for the Meteor game."""
+
 import random
 import pygame
 
@@ -12,22 +13,10 @@ class People:
         self._display = []
         self._people_positions = [0]
         self._screen = screen
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
-        self._people.append(pygame.image.load("backgrounds\\people.png").convert_alpha())
+        for _ in range(0,15):
+            self._people.append(
+                pygame.image.load("backgrounds\\people.png").convert_alpha()
+            )
         self._visible = False
         self._which = -1
         self._diff_x = 0
@@ -37,7 +26,8 @@ class People:
             self._display.append(True)
             self._people_x.append(self._screen.get_width() // 3)
             self._people_positions.append(first)
-            first += random.randint(2000,3000)
+            first += 3000
+
     @property
     def x(self):
         """Get the current x position of the city."""
@@ -47,11 +37,21 @@ class People:
     def visible(self):
         """Check if visible"""
         return self._visible
+    @visible.setter
+    def visible(self,value):
+        """set visible"""
+        self._display[self._which] = value
+        self._visible = value
+
+    def number_of_people(self):
+        """get number of people"""
+        return self._display.count(True)
 
     @property
     def y(self):
         """Get the current y position of the city"""
-        return self._screen.get_height()-30
+        return self._screen.get_height() - 30
+
     @property
     def position(self):
         """Get the current position of the city."""
@@ -61,10 +61,10 @@ class People:
     def which(self):
         """which city"""
         return self._which
-    
-    def impact_check(self, rock):
-        """Check for collision with the meteor.""" 
-        rock_rect = rock.asteroid.get_rect(topleft=(rock.x, rock.y))
+
+    def alien_check(self, a):
+        """Check for collision with the meteor."""
+        rock_rect = a.image.get_rect(topleft=(a.x, a.y))
         person_rect = self._people[self._which].get_rect(topleft=(self.x, self.y))
         checked = rock_rect.colliderect(person_rect)
         if checked:
@@ -72,8 +72,24 @@ class People:
         return checked
 
 
+    def impact_check(self, rock):
+        """Check for collision with the meteor."""
+        rock_rect = rock.asteroid.get_rect(topleft=(rock.x, rock.y))
+        person_rect = self._people[self._which].get_rect(topleft=(self.x, self.y))
+        checked = rock_rect.colliderect(person_rect)
+        if checked:
+            self._display[self._which] = False
+        return checked
+
+    def get_person(self):
+        """return self"""
+        if self._which <= self._max:
+            if self._display[self._which]:
+                return self
+        return None
+
     def crash_check(self, plane):
-        """Check for plane """
+        """Check for plane"""
         if plane.shield_on:
             return False  # No collision if the shield is on
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
@@ -84,10 +100,10 @@ class People:
         return checked
 
     def reborn(self):
-        """ randomly show an person """
-        i = random.randint(0,self._max)
-        x = random.randint(0,1000)
-        if i<len(self._display) and x<1:
+        """randomly show an person"""
+        i = random.randint(0, self._max)
+        x = random.randint(0, 1000)
+        if i < len(self._display) and x < 1:
             self._display[i] = True
 
     def display(self, world_x, diff_x):
@@ -112,8 +128,14 @@ class People:
         """Draw the city layers on the screen."""
         if which_city <= self._max:
             self._which = which_city
-            screen_x = self._people_positions[which_city] - world_x + self._screen.get_width() // 3 
-            self._screen.blit(self._people[which_city], (screen_x, self._screen.get_height()-30))
-            self._people_x[which_city]= screen_x
+            screen_x = (
+                self._people_positions[which_city]
+                - world_x
+                + self._screen.get_width() // 3
+            )
+            self._screen.blit(
+                self._people[which_city], (screen_x, self._screen.get_height() - 30)
+            )
+            self._people_x[which_city] = screen_x
             return True
         return False
