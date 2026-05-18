@@ -12,16 +12,18 @@ class Mutant:
     """Mutant class represents an Mutant that moves across the screen and can fire bullets at the player's plane."""
 
     def __init__(self, screen, plane):
+        filenames = ["chopper.png","ewok.png","defender_mutant.png","bob_ross.png","mutant_area51.png","mutant_chopper.png","mutant_drone.png","vader_ship.png","mutant.png","vader_ufo.png","mutant_predator.png"]
+        filename = random.choice(filenames)
         self._screen = screen
-        self._speed = 5
+        self._speed = 3
         self._hunting = False
         self._bullet = None
         self._right = False
         self._insights = False
         self._visible = True
         self._speed = random.randint(2, 10)
-        self._image_left = pygame.image.load("player\\mutant.png").convert_alpha()
-        self._image_right = pygame.image.load("player\\mutant.png").convert_alpha()
+        self._image_left = pygame.image.load(f"player\\{filename}").convert_alpha()
+        self._image_right = pygame.image.load(f"player\\{filename}").convert_alpha()
         self._explosion = pygame.image.load(
             "player\\alien_explosion.png"
         ).convert_alpha()
@@ -97,7 +99,7 @@ class Mutant:
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         mutant_rect = self._image.get_rect(topleft=(self._x, self._y))
         change_direction_chance = (
-            random.randint(0, 100) < 4
+            random.randint(0, 100) < 5
         )  # 4% chance to change direction
         # Fire logic and collisions use world coordinates
         fire = random.randint(0, 100) < 50
@@ -231,7 +233,10 @@ class Mutant:
             ):
                 self._insights = True
 
-        if self._carrying_person:
+        if self._y < plane.y:
+            self._y += self._speed
+
+        if self._y > plane.y:
             self._y -= self._speed
 
 

@@ -210,7 +210,7 @@ class Game:
             # Update positions
             if self.plane.y==0:
                 if self.plane.carrying_person:
-                    self.plane.add_score(200)
+                    self.plane.add_score(200 * self.planet)
                     self.plane.carrying_person = False
             # Draw layers (two copies each for looping)
             if self.plane.lives <= 0:
@@ -282,7 +282,7 @@ class Game:
                         if len(self._mutants)<(self.planet):
                             self._mutants.append(Mutant(self._screen, self.plane))
             if self.map_city.people.visible:
-                if hunting_set is False:
+                if hunting_set is False and len(self._aliens)>0:
                     alien = random.choice(self._aliens)
                     if alien is not None:
                         hunting_set = True
@@ -320,23 +320,21 @@ class Game:
                                 mm.explode()
 
                 self._screen.blit(meteor.asteroid, (meteor.x, meteor.y))
-                if loop % 20 == 0:
-                    self.map_city.people.reborn()
                 meteor.move(self.plane)
                 if self.map_city.city.hit_meteor_check(meteor):
-                    self.plane.add_score(-100 * self.number_aliens)
+                    self.plane.add_score(-100 * self.planet)
                 if meteor.crash_check(self.plane, True):
                     self.plane.explode()
                     meteor.reset()
                 if meteor.crash_check(self.plane, False):
                     meteor.explode()
-                    self.plane.add_score(3 * self.number_aliens)
+                    self.plane.add_score(3 * self.planet)
                     self.plane.hit_on_shield()
                 if self.plane.fired_missle and self.plane.fired_missle.hit_check(
                     meteor
                 ):
                     meteor.explode()
-                    self.plane.add_score(10 * self.number_aliens)
+                    self.plane.add_score(10 * self.planet)
                     self.plane.fired_missle = None  # Remove missle after hit
                     if len(meteor.asteroids) > 0:
                         new_meteors.append(
@@ -348,7 +346,7 @@ class Game:
             for meteor in meteors:
                 if self.map_city.ptarget_shown:
                     if self.map_city.people.impact_check(meteor):
-                        self.plane.add_score(-200)
+                        self.plane.add_score(-10 * self.planet)
                 if meteor.y > self._screen.get_height():
                     new_meteors.append(meteor)
 
@@ -366,13 +364,11 @@ class Game:
             self.map_city.draw(self.plane.world_x, lastx)
             if self.map_city.ptarget_shown:
                 if self.map_city.people.crash_check(self.plane):
-                    self.plane.add_score(100)
+                    self.plane.add_score(10 *self.planet)
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
-                    self.planet += 1
-                    if self.planet > 12:
-                        self.planet = 1
+                    self.planet = random.randint(1,14)
                     self.layer3 = pygame.image.load(
                         f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()
@@ -398,12 +394,12 @@ class Game:
 
             lastx = self.plane.world_x
             score_text = (
-                f"SmartBombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} "
+                f"Bombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} "
             )
             score_text += f"Score:{self.plane.score} Lives:{self.plane.lives} "
             score_text += f"Meteors:{len(meteors)} "
             score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet} "
-            score_text += f"Rescues:{self.map_city.people.number_of_people()}"
+            score_text += f"People:{self.map_city.people.number_of_people()}"
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )

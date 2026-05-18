@@ -108,7 +108,7 @@ class Alien:
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         alien_rect = self._image.get_rect(topleft=(self._x, self._y))
         change_direction_chance = (
-            random.randint(0, 100) < 4
+            random.randint(0, 1000) < 4
         )  # 4% chance to change direction
         # Fire logic and collisions use world coordinates
         fire = random.randint(0, 100) < 50
