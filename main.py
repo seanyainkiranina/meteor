@@ -28,6 +28,7 @@ from lib.plane import Plane  # pylint: disable=[E0611,W0611]
 from lib.map import Map
 from lib.startscreen import StartScreen
 from lib.alien import Alien
+from lib.mutant import Mutant
 
 
 class Game:
@@ -65,6 +66,7 @@ class Game:
         self.background = None  # Will be initialized in run()
         self._aliens = []
         self._bullets = []
+        self._mutants = []
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
         self.x2 = 0
@@ -238,6 +240,18 @@ class Game:
                     for _ in range(random.randint(0, 1)):
                         self._aliens.append(Alien(self._screen, self.plane))
             loop = 0
+            for mutant in self._mutants:
+                if mutant is not None:
+                    bullet =  mutant.move(
+                        meteors, self.plane, self._aliens, self.plane.fired_missle
+                    )
+                    if bullet is not None and bullet.image is not None:
+                        self._bullets.append(bullet)
+                    self._screen.blit(mutant.image, (mutant.x, mutant.y))
+                    if mutant.x < -3000 or mutant.x > 3000:
+                        self._mutants.remove(mutant)
+                        self._mutants.append(Mutant(self._screen, self.plane))
+
             for alien in self._aliens:
                 if alien is not None:
                     bullet = alien.move(
@@ -256,6 +270,9 @@ class Game:
                     if alien.x < -3000 or alien.x > 3000:
                         self._aliens.remove(alien)
                         self._aliens.append(Alien(self._screen, self.plane))
+                    if alien.y <= 0 and alien.carrying_person:
+                        self._aliens.remove(alien)
+                        self._mutants.append(Mutant(self._screen, self.plane))
             if map_city.people.visible:
                 if hunting_set is False:
                     alien = random.choice(self._aliens)

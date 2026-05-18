@@ -1,4 +1,4 @@
-"""Alien class for the Meteor game."""
+"""Mutant class for the Meteor game."""
 
 import random
 import pygame
@@ -8,26 +8,20 @@ from lib.bullet import Bullet  # pylint: disable=[E0611,W0611]
 # from lib.people import People
 
 
-class Alien:
-    """Alien class represents an alien that moves across the screen and can fire bullets at the player's plane."""
+class Mutant:
+    """Mutant class represents an Mutant that moves across the screen and can fire bullets at the player's plane."""
 
     def __init__(self, screen, plane):
         self._screen = screen
-        self._speed = 1
+        self._speed = 5
         self._hunting = False
         self._bullet = None
         self._right = False
         self._insights = False
         self._visible = True
         self._speed = random.randint(2, 10)
-        self._image_left = pygame.image.load("player\\alien.png").convert_alpha()
-        self._image_right = pygame.image.load("player\\alien_right.png").convert_alpha()
-        self._image_left_person = pygame.image.load(
-            "player\\alien_person.png"
-        ).convert_alpha()
-        self._image_right_person = pygame.image.load(
-            "player\\alien_right_person.png"
-        ).convert_alpha()
+        self._image_left = pygame.image.load("player\\mutant.png").convert_alpha()
+        self._image_right = pygame.image.load("player\\mutant.png").convert_alpha()
         self._explosion = pygame.image.load(
             "player\\alien_explosion.png"
         ).convert_alpha()
@@ -46,16 +40,6 @@ class Alien:
 
         self._y = random.randint(self._image.get_height(), screen.get_height() // 2)
         self._x = self._world_x  # initial screen projection
-
-    @property
-    def carrying_person(self):
-        """is carrying person"""
-        return self._carrying_person
-
-    @carrying_person.setter
-    def carrying_person(self, value):
-        """set carrying person to value"""
-        self._carrying_person = value
 
     @property
     def target(self):
@@ -79,34 +63,34 @@ class Alien:
 
     @property
     def x(self):
-        """Get the current x position of the alien."""
+        """Get the current x position of the Mutant."""
         return self._x
 
     @property
     def y(self):
-        """Get the current y position of the alien."""
+        """Get the current y position of the Mutant."""
         return self._y
 
     @property
     def image(self):
-        """Get the current image of the alien."""
+        """Get the current image of the Mutant."""
         return self._image
 
     @property
     def bullet(self):
-        """Get the current bullet of the alien."""
+        """Get the current bullet of the Mutant."""
         return self._bullet
 
     @bullet.setter
     def bullet(self, value):
-        """Set the bullet of the alien."""
+        """Set the bullet of the Mutant."""
         self._bullet = value
 
-    def move(self, meteors, plane, aliens, missle):
-        """Move the alien using world coordinates."""
-        lookahead_distance = 50
+    def move(self, meteors, plane, Mutants, missle):
+        """Move the Mutant using world coordinates."""
+        lookahead_distance = 100
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
-        alien_rect = self._image.get_rect(topleft=(self._x, self._y))
+        mutant_rect = self._image.get_rect(topleft=(self._x, self._y))
         change_direction_chance = (
             random.randint(0, 100) < 4
         )  # 4% chance to change direction
@@ -124,27 +108,27 @@ class Alien:
             return
 
         if plane.using_smart_bombs:
-            # Check if the alien is within the smart bomb's blast radius
+            # Check if the Mutant is within the smart bomb's blast radius
             smart_bomb_radius = 200  # Example radius for the smart bomb
-            distance_to_alien = (
+            distance_to_mutant = (
                 (self._x - plane.x) ** 2 + (self._y - plane.y) ** 2
             ) ** 0.5
-            if distance_to_alien <= smart_bomb_radius:
+            if distance_to_mutant <= smart_bomb_radius:
                 self._image = self._explosion
                 self._visible = False
                 plane.add_score(
                     150
-                )  # Award points for hitting the alien with a smart bomb
+                )  # Award points for hitting the Mutant with a smart bomb
                 return
 
-        if plane_rect.colliderect(alien_rect) and self._visible:
+        if plane_rect.colliderect(mutant_rect) and self._visible:
             if plane.shield_on:
                 plane.hit_on_shield()  # Reduce shield time instead of lives
                 self._image = self._explosion
                 self._visible = False
                 plane.add_score(
                     50
-                )  # Award points for hitting the alien with the shield on
+                )  # Award points for hitting the Mutant with the shield on
                 return
             plane.explode()
             self._image = self._explosion
@@ -163,35 +147,14 @@ class Alien:
         if self._right:
             self._world_x += self._speed
             self._image = self._image_right
-            if abs(plane.x - self._x) < 50:
+            if abs(plane.x - self._x) < 200:
                 self._insights = True
         else:
             self._world_x -= self._speed
             self._image = self._image_left
-            if abs(plane.x - self._x) < 50:
+            if abs(plane.x - self._x) < 200:
                 self._insights = True
 
-        if self._hunting and self._carrying_person is False:
-            if self._person is not None:
-                if self._person.x < self.x:
-                    self._right = False
-                else:
-                    self._right = True
-                if self._y < self._person.y:
-                    self._y += self._speed
-                if self._x > self._person.x - 2:
-                    self._x -= self._speed
-                if self._x < self._person.x - 3:
-                    self._x += self._speed
-                if self._x > self._person.x - 13 and self._x < self._person.x + 13:
-                    if self._y > self._person.y - 26 and self._y < self._person.y + 26:
-                        self._person.visible = False
-                        self._carrying_person = True
-                        self._hunting = False
-                        plane.add_score(-400)
-            else:
-                self._hunting = False
-            return
 
         # Bullet creation uses world coordinates
         if fire and self._bullet is None and self._insights:
@@ -211,7 +174,7 @@ class Alien:
 
         if missle is not None:
             missle_rect = missle.image.get_rect(topleft=(missle.x(), missle.y()))
-            if missle_rect.colliderect(alien_rect):
+            if missle_rect.colliderect(mutant_rect):
                 self._image = self._explosion
                 self._visible = False
                 plane.add_score(100)
@@ -250,47 +213,26 @@ class Alien:
         if self._right:
             self._x += self._speed
             self._image = self._image_right
-            if self._carrying_person:
-                self._image = self._image_right_person
-            if self._x < plane.x and plane.y < self._y + 50 and plane.y > self._y - 50:
+            if self._x < plane.x and plane.y < self._y + 100 and plane.y > self._y - 100:
                 self._insights = True
         else:
             self._x -= self._speed
             self._image = self._image_left
-            if self._carrying_person:
-                self._image = self._image_left_person
             lookahead_distance = -lookahead_distance
             if (
                 self._x > plane.x
                 and plane.y < self._y + 50
                 and plane.y > self._y - 50
-                and self._hunting is False
             ):
                 self._insights = True
 
         if self._carrying_person:
             self._y -= self._speed
 
-        for a in aliens:
-            if a is not self:
-                if alien_rect.colliderect(
-                    pygame.Rect(
-                        self._x + lookahead_distance,
-                        self._y,
-                        self._image.get_width(),
-                        self._image.get_height(),
-                    )
-                ):
-                    if a.y < self._y and change_direction_chance:
-                        self._y += self._speed
-                        break
-                    if a.y > self._y and change_direction_chance:
-                        self._y -= self._speed
-                        break
 
         for meteor in meteors:
             meteor_rect = meteor.asteroid.get_rect(topleft=(meteor.x, meteor.y))
-            if meteor_rect.colliderect(alien_rect):
+            if meteor_rect.colliderect(mutant_rect):
                 self._image = self._explosion
                 self._visible = False
 
@@ -305,24 +247,22 @@ class Alien:
                 if (
                     meteor.y < self._y
                     and change_direction_chance
-                    and self._hunting is False
                 ):
-                    self._y += 1
+                    self._y += self._speed
                     break
                 if (
                     meteor.y > self._y
                     and change_direction_chance
-                    and self._hunting is False
                 ):
-                    self._y -= 1
+                    self._y -= self._speed
                     break
-        if change_direction_chance and self._insights and self._hunting is False:
+        if change_direction_chance and self._insights:
             if plane.y < self._y:
-                self._y -= 1
+                self._y -= self._speed
             if plane.y > self._y:
-                self._y += 1
+                self._y += self._speed
 
-        # Draw alien
+        # Draw Mutant
         if self._visible:
             self._screen.blit(self._image, (self._x, self._y))
 
