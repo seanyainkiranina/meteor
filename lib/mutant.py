@@ -32,15 +32,20 @@ class Mutant:
         # Random start direction and world position
         if random.randint(0, 100) % 2 == 0:
             self._right = True
-            self._world_x = -2000 + plane.world_x
+            self._world_x = -20 + plane.world_x
             self._image = self._image_right
         else:
-            self._world_x = 2000 + plane.world_x
+            self._world_x = 20 + plane.world_x
             self._image = self._image_left
 
-        self._y = random.randint(self._image.get_height(), screen.get_height() // 2)
+        self._y = self._image.get_height() +2
         self._x = self._world_x  # initial screen projection
-
+  
+    @property
+    def visible(self):
+        """Get if Mutant is visible"""
+        return self._visible
+  
     @property
     def target(self):
         """Get target"""

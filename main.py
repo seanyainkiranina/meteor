@@ -151,7 +151,7 @@ class Game:
         screen_width, screen_height = 800, 600
         self._bullets.clear()
         self._right = False
-
+        self._mutants =[]
         self.background = None  # Will be initialized in run()
         self._aliens = []
         for _ in range(random.randint(1, self.number_aliens)):
@@ -161,6 +161,9 @@ class Game:
         self.x1 = 0
         self.x2 = 0
         self.x3 = 0
+        if self.map_city is not None:
+            self.map_city.people.ressurection()
+
         self.plane = Plane(
             screen_width // 2,
             screen_height // 2,
@@ -252,9 +255,9 @@ class Game:
                     if bullet is not None and bullet.image is not None:
                         self._bullets.append(bullet)
                     self._screen.blit(mutant.image, (mutant.x, mutant.y))
-                    if mutant.x < -3000 or mutant.x > 3000:
+                    if mutant.x < -3000 or mutant.x > 3000 or mutant.visible is False:
                         self._mutants.remove(mutant)
-                        self._mutants.append(Mutant(self._screen, self.plane))
+                        
 
             for alien in self._aliens:
                 if alien is not None:
@@ -276,7 +279,7 @@ class Game:
                         self._aliens.append(Alien(self._screen, self.plane))
                     if alien.y <= 0 and alien.carrying_person:
                         self._aliens.remove(alien)
-                        if len(self._mutants)<5:
+                        if len(self._mutants)<(self.planet):
                             self._mutants.append(Mutant(self._screen, self.plane))
             if self.map_city.people.visible:
                 if hunting_set is False:
@@ -368,7 +371,7 @@ class Game:
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
                     self.planet += 1
-                    if self.planet > 10:
+                    if self.planet > 12:
                         self.planet = 1
                     self.layer3 = pygame.image.load(
                         f"backgrounds\\layer{self.planet}.png"
