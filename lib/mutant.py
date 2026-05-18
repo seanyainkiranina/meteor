@@ -99,7 +99,7 @@ class Mutant:
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         mutant_rect = self._image.get_rect(topleft=(self._x, self._y))
         change_direction_chance = (
-            random.randint(0, 100) < 5
+            random.randint(0, 100) < 1
         )  # 4% chance to change direction
         # Fire logic and collisions use world coordinates
         fire = random.randint(0, 100) < 50

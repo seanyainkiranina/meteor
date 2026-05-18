@@ -13,7 +13,7 @@ class People:
         self._display = []
         self._people_positions = [0]
         self._screen = screen
-        for _ in range(0,15):
+        for _ in range(0, 15):
             self._people.append(
                 pygame.image.load("backgrounds\\people.png").convert_alpha()
             )
@@ -37,8 +37,9 @@ class People:
     def visible(self):
         """Check if visible"""
         return self._visible
+
     @visible.setter
-    def visible(self,value):
+    def visible(self, value):
         """set visible"""
         self._display[self._which] = value
         self._visible = value
@@ -46,10 +47,10 @@ class People:
     def number_of_people(self):
         """get number of people"""
         return self._display.count(True)
-    
+
     def ressurection(self):
         """bring them all back"""
-        for index,_ in enumerate(self._display):
+        for index, _ in enumerate(self._display):
             self._display[index] = True
 
     @property
@@ -76,7 +77,6 @@ class People:
             self._display[self._which] = False
         return checked
 
-
     def impact_check(self, rock):
         """Check for collision with the meteor."""
         rock_rect = rock.asteroid.get_rect(topleft=(rock.x, rock.y))
@@ -97,8 +97,11 @@ class People:
         """Check for plane"""
         if plane.shield_on:
             return False  # No collision if the shield is on
+        if plane.carrying_person: # cannot pick up two
+            return False
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
         person_rect = self._people[self._which].get_rect(topleft=(self.x, self.y))
+
         checked = plane_rect.colliderect(person_rect)
         if checked:
             self._display[self._which] = False

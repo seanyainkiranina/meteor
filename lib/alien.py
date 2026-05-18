@@ -44,7 +44,7 @@ class Alien:
             self._world_x = 2000 + plane.world_x
             self._image = self._image_left
 
-        self._y = random.randint(self._image.get_height(), screen.get_height() // 2)
+        self._y = random.randint(self._image.get_height(), screen.get_height() - self._image.get_height())
         self._x = self._world_x  # initial screen projection
 
     @property
