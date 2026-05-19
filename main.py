@@ -188,7 +188,7 @@ class Game:
         self.map_city = Map(self._screen)
         meteors = [
             Meteor(
-                self._screen.get_width(), self._screen.get_height(), self.plane.world_x
+                self._screen.get_width(), self._screen.get_height(), self.plane.world_x,self.planet
             )
             for _ in range(5)
         ]
@@ -241,6 +241,7 @@ class Game:
                             self._screen.get_width(),
                             self._screen.get_height(),
                             self.plane.world_x,
+                            self.planet
                         )
                     )
                 if len(self._aliens) < (self.number_aliens):

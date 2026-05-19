@@ -9,8 +9,9 @@ import pygame
 class Meteor:
     """Class representing the main game logic for the Meteor game."""
 
-    def __init__(self, width, height, world_x=0, prefix=None, x=None, y=None):
+    def __init__(self, width, height, world_x=0, planet=1,prefix=None, x=None, y=None):
         self._asteroids = []
+        self._planet = planet
         if x is None or y is None:
             self._x = random.randint(0, width)
             self._y = random.randint(-2000, -200)  # Start above the screen
@@ -254,7 +255,7 @@ class Meteor:
 
     def move(self, plane, rotate=False):
         """Move the asteroid downwards."""
-        speed = random.randint(1, 5)
+        speed = random.randint(1, self._planet +1)
         self._y += speed  # Move down by a random speed
         # Convert world → screen for drawing
         self._x = self._world_x - plane.world_x + self._width // 2
@@ -284,6 +285,7 @@ class Meteor:
                 self._width,
                 self._height,
                 self._world_x + random.randint(-4, 4),
+                self._planet,
                 file_name,
                 new_x,
                 random.choice(array_y),

@@ -20,13 +20,15 @@ class Alien:
         self._insights = False
         self._visible = True
         self._speed = random.randint(2, 10)
-        self._image_left = pygame.image.load("player\\alien.png").convert_alpha()
-        self._image_right = pygame.image.load("player\\alien_right.png").convert_alpha()
-        self._image_left_person = pygame.image.load(
-            "player\\alien_person.png"
-        ).convert_alpha()
+        images = ["alien","bob_ross","chopper","ewok","mutant_chopper","mutant_drone"]
+        image = random.choice(images)
+        self._image_right = pygame.image.load(f"player\\{image}.png").convert_alpha()
+        self._image_left = pygame.image.load(f"player\\{image}_right.png").convert_alpha()
         self._image_right_person = pygame.image.load(
-            "player\\alien_right_person.png"
+            f"player\\{image}_person.png"
+        ).convert_alpha()
+        self._image_left_person = pygame.image.load(
+            f"player\\{image}_right_person.png"
         ).convert_alpha()
         self._explosion = pygame.image.load(
             "player\\alien_explosion.png"
@@ -177,14 +179,14 @@ class Alien:
                     self._right = False
                 else:
                     self._right = True
-                if self._y < self._person.y:
+                if self._y < 600 - self._image.get_height():
                     self._y += self._speed
                 if self._x > self._person.x - 2:
                     self._x -= self._speed
                 if self._x < self._person.x - 3:
                     self._x += self._speed
-                if self._x > self._person.x - 13 and self._x < self._person.x + 13:
-                    if self._y > self._person.y - 26 and self._y < self._person.y + 26:
+                if self._x > self._person.x - (self._image.get_width() //2) and self._x < self._person.x + (self._image.get_width() //2):
+                    if  self._y > 600 - self._image.get_height():
                         self._person.visible = False
                         self._carrying_person = True
                         self._hunting = False
