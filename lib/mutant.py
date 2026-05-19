@@ -12,7 +12,7 @@ class Mutant:
     """Mutant class represents an Mutant that moves across the screen and can fire bullets at the player's plane."""
 
     def __init__(self, screen, plane):
-        filenames = ["chopper.png","ewok.png","defender_mutant.png","bob_ross.png","mutant_area51.png","mutant_chopper.png","mutant_drone.png","vader_ship.png","mutant.png","vader_ufo.png","mutant_predator.png"]
+        filenames = ["mutant.png","defender_mutant.png"]
         filename = random.choice(filenames)
         self._screen = screen
         self._speed = 3
