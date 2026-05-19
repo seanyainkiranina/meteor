@@ -33,6 +33,8 @@ class Missle:
         return self._y
     def hit_check(self, meteor):
         """Check if the missle has hit a meteor."""
+        if self._image is None:
+            return False
         missle_rect = self._image.get_rect(topleft=(self._x, self._y))
         meteor_rect = meteor.asteroid.get_rect(topleft=(meteor.x, meteor.y))
         return missle_rect.colliderect(meteor_rect)

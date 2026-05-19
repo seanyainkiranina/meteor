@@ -51,28 +51,12 @@ class Plane:
         ).convert_alpha()
         self._image = self._image_right  # Pygame surface for the plane
         self._missle = None  # Missle object representing the plane's missle
+        self._missles = []
         self._explosions = []  # List to hold explosion objects when the plane is hit
-        self._explosions.append(
-            pygame.image.load("player\\explosions\\1.png").convert_alpha()
-        )
-        self._explosions.append(
-            pygame.image.load("player\\explosions\\2.png").convert_alpha()
-        )
-        self._explosions.append(
-            pygame.image.load("player\\explosions\\3.png").convert_alpha()
-        )
-        self._explosions.append(
-            pygame.image.load("player\\explosions\\4.png").convert_alpha()
-        )
-        self._explosions.append(
-            pygame.image.load("player\\explosions\\5.png").convert_alpha()
-        )
-        self._explosions.append(
-            pygame.image.load("player\\explosions\\6.png").convert_alpha()
-        )
-        self._explosions.append(
-            pygame.image.load("player\\explosions\\7.png").convert_alpha()
-        )
+        for x in range(1, 7):
+            self._explosions.append(
+                pygame.image.load(f"player\\explosions\\{x}.png").convert_alpha()
+            )
         self._exploding = False  # Flag to indicate if the plane is currently exploding
         self._explosion_frame = 0
         self._reset = False
@@ -145,11 +129,19 @@ class Plane:
     @property
     def fired_missle(self):
         """Get the current missle object."""
-        return self._missle
+        return self._missles
 
-    @fired_missle.setter
-    def fired_missle(self, value):
-        self._missle = value
+    def remove_missles(self):
+        """remove missles"""
+        if isinstance(self._missles, list) is False:
+            self._missles=[]
+
+        if len(self._missles)==0:
+            return
+        self._missles = [
+            m for m in self._missles
+            if m is not None and getattr(m, "image", None) is not None
+        ]
 
     @property
     def smart_bombs(self):
@@ -230,6 +222,7 @@ class Plane:
         self._explosion_frame = 0
         self._shield_on = False
         self._shield_time = 1000
+        self._missles = []
         if self._lives <= 0:
             self._game_over = True
 
@@ -346,15 +339,24 @@ class Plane:
             and not self._shield_on
         ):
             # Fire a missle if space is pressed and there isn't already one on screen
+            if len(self._missles) > 2:
+                return
+            fired_rocket_x = ((self._image.get_width() // 2) * len(self._missles))
+            if self._right:
+                fired_rocket_x = 0- fired_rocket_x
             self._missle = Missle(
-                self._x + self._image.get_width() // 2,
+                self._x + fired_rocket_x,
                 self._y,
                 self._width,
                 self._height,
                 "player\\missle.png",
                 "player\\missle_right.png",
             )
-            self._missle.direction = self._right  # Set missle direction to match plane
+            self._missle.direction = self._right
+            if self._missles is None:
+                self._missles = []
+            self._missles.append(self._missle) # type: ignore
+            self._missle = None  # Set missle direction to match plane
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = max(0, min(self._height - self._image.get_height(), self._y))
 

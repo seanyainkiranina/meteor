@@ -179,13 +179,17 @@ class Mutant:
         if self._bullet is not None and self._bullet.image is None:
             self._bullet = None  # Remove bullet if it goes off-screen
 
-        if missle is not None:
-            missle_rect = missle.image.get_rect(topleft=(missle.x(), missle.y()))
-            if missle_rect.colliderect(mutant_rect):
-                self._image = self._explosion
-                self._visible = False
-                plane.add_score(100)
-                return
+
+        if len(missle)>0:
+            for m in missle:
+                if m is None or m.image is None:
+                    continue
+                missle_rect = m.image.get_rect(topleft=(m.x(), m.y()))
+                if missle_rect.colliderect(mutant_rect):
+                    self._image = self._explosion
+                    self._visible = False
+                    plane.add_score(100)
+                    return
 
         if not self._visible and self._explosion_frames > 0:
             self._explosion_frames -= 1

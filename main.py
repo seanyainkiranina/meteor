@@ -107,8 +107,8 @@ class Game:
     def number_aliens(self):
         """return number of aliens"""
         i_max = round((3 + self.planet) // random.randint(1, 3), 0) + 1
-        if i_max>=15:
-            i_max =10
+        if i_max >= 10:
+            i_max = 10
         return i_max
 
     def softreset(self):
@@ -122,7 +122,7 @@ class Game:
         self._bullets.clear()
         self.background = None  # Will be initialized in run()
         self._aliens = []
-        self._mutants =[]
+        self._mutants = []
         for _ in range(random.randint(1, self.number_aliens)):
             self._aliens.append(Alien(self._screen, self.plane))
 
@@ -151,7 +151,7 @@ class Game:
         screen_width, screen_height = 800, 600
         self._bullets.clear()
         self._right = False
-        self._mutants =[]
+        self._mutants = []
         self.background = None  # Will be initialized in run()
         self._aliens = []
         for _ in range(random.randint(1, self.number_aliens)):
@@ -208,7 +208,7 @@ class Game:
                     running = False
 
             # Update positions
-            if self.plane.y==0:
+            if self.plane.y == 0:
                 if self.plane.carrying_person:
                     self.plane.add_score(200 * self.planet)
                     self.plane.carrying_person = False
@@ -216,23 +216,23 @@ class Game:
             if self.plane.lives <= 0:
                 running = False
             self.plane.move()
+            self.plane.remove_missles()
             self.camera.update(self.plane.world_x)
             if self.background is not None:
                 self.background.draw(self._screen, self.camera.x)
             self._right = self.plane.direction
             # print(f"Plane direction: {'Right' if self._right else 'Left'}")
             self._screen.blit(self.plane.image, (self.plane.x, self.plane.y))
-            if self.plane.fired_missle:
-                self.plane.fired_missle.move()
-                if self.plane.fired_missle.image:
-                    self._screen.blit(
-                        self.plane.fired_missle.image,
-                        (self.plane.fired_missle.x(), self.plane.fired_missle.y()),
-                    )
-                else:
-                    self.plane.fired_missle = (
-                        None  # Remove missle if it goes off-screen
-                    )
+
+            if len(self.plane.fired_missle) >0:
+                for missle in self.plane.fired_missle:
+                    if missle is not None:
+                        missle.move()
+                        if missle.image:
+                            self._screen.blit(
+                                missle.image,
+                                (missle.x(), missle.y()),
+                            )
             # Move meteor randomly to avoid overlap
             if random.randint(0, 100) % 20 == 0 and len(meteors) < (self.number_aliens):
                 for _ in range(random.randint(0, self.number_aliens)):
@@ -249,7 +249,7 @@ class Game:
             loop = 0
             for mutant in self._mutants:
                 if mutant is not None:
-                    bullet =  mutant.move(
+                    bullet = mutant.move(
                         meteors, self.plane, self._aliens, self.plane.fired_missle
                     )
                     if bullet is not None and bullet.image is not None:
@@ -257,7 +257,6 @@ class Game:
                     self._screen.blit(mutant.image, (mutant.x, mutant.y))
                     if mutant.x < -3000 or mutant.x > 3000 or mutant.visible is False:
                         self._mutants.remove(mutant)
-                        
 
             for alien in self._aliens:
                 if alien is not None:
@@ -271,24 +270,23 @@ class Game:
                         if alien.hunting is True:
                             hunting_set = True
                             if self.map_city.people.visible is False:
-                                alien.hunting=False
-                                hunting_set= False
+                                alien.hunting = False
+                                hunting_set = False
 
                     if alien.x < -3000 or alien.x > 3000:
                         self._aliens.remove(alien)
                         self._aliens.append(Alien(self._screen, self.plane))
                     if alien.y <= 0 and alien.carrying_person:
                         self._aliens.remove(alien)
-                        if len(self._mutants)<(self.planet):
+                        if len(self._mutants) < (self.planet):
                             self._mutants.append(Mutant(self._screen, self.plane))
             if self.map_city.people.visible:
-                if hunting_set is False and len(self._aliens)>0:
+                if hunting_set is False and len(self._aliens) > 0:
                     alien = random.choice(self._aliens)
                     if alien is not None:
                         hunting_set = True
-                        alien.hunting=True
+                        alien.hunting = True
                         alien.target = self.map_city.people.get_person()
-
 
             for b in self._bullets:
                 if b is not None and b.image is not None:
@@ -330,19 +328,21 @@ class Game:
                     meteor.explode()
                     self.plane.add_score(3 * self.planet)
                     self.plane.hit_on_shield()
-                if self.plane.fired_missle and self.plane.fired_missle.hit_check(
-                    meteor
-                ):
-                    meteor.explode()
-                    self.plane.add_score(10 * self.planet)
-                    self.plane.fired_missle = None  # Remove missle after hit
-                    if len(meteor.asteroids) > 0:
-                        new_meteors.append(
-                            meteor.asteroids.pop(0)
-                        )  # Remove the first asteroid in the list
+                if len(self.plane.fired_missle) >0:
+                    for rocket in self.plane.fired_missle:
+                        if rocket is not None and rocket.image is not None and rocket.hit_check(
+                            meteor
+                        ):
+                            meteor.explode()
+                            self.plane.add_score(10 * self.planet)
+                            rocket = None  # Remove missle after hit
+                            if len(meteor.asteroids) > 0:
+                                new_meteors.append(
+                                    meteor.asteroids.pop(0)
+                                )  # Remove the first asteroid in the list
 
-            meteors.extend(new_meteors)
-            new_meteors.clear()  # Clear the list for the next frame
+                                meteors.extend(new_meteors)
+                                new_meteors.clear()  # Clear the list for the next frame
             for meteor in meteors:
                 if self.map_city.ptarget_shown:
                     if self.map_city.people.impact_check(meteor):
@@ -364,11 +364,11 @@ class Game:
             self.map_city.draw(self.plane.world_x, lastx)
             if self.map_city.ptarget_shown:
                 if self.map_city.people.crash_check(self.plane):
-                    self.plane.add_score(10 *self.planet)
+                    self.plane.add_score(10 * self.planet)
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
-                    self.planet = random.randint(1,15)
+                    self.planet = random.randint(1, 15)
                     self.layer3 = pygame.image.load(
                         f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()
