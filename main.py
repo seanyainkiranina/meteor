@@ -83,8 +83,7 @@ class Game:
             "player\\plane.png",
         )  # Player's plane
         for _ in range(random.randint(1, 5)):
-            self._aliens.append(Alien(self._screen, self.plane))
-        self.camera = Camera(screen_width)
+            self._aliens.append(Alien(self._screen, self.plane,self.planet))
         self.background = ParallaxBackground(
             [
                 ParallaxLayer(self.layer1, 0.2),  # far
@@ -124,7 +123,7 @@ class Game:
         self._aliens = []
         self._mutants = []
         for _ in range(random.randint(1, self.number_aliens)):
-            self._aliens.append(Alien(self._screen, self.plane))
+            self._aliens.append(Alien(self._screen, self.plane,self.planet))
 
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
@@ -155,7 +154,7 @@ class Game:
         self.background = None  # Will be initialized in run()
         self._aliens = []
         for _ in range(random.randint(1, self.number_aliens)):
-            self._aliens.append(Alien(self._screen, self.plane))
+            self._aliens.append(Alien(self._screen, self.plane,self.planet))
 
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
@@ -246,7 +245,7 @@ class Game:
                     )
                 if len(self._aliens) < (self.number_aliens):
                     for _ in range(random.randint(0, 1)):
-                        self._aliens.append(Alien(self._screen, self.plane))
+                        self._aliens.append(Alien(self._screen, self.plane,self.planet))
             loop = 0
             for mutant in self._mutants:
                 if mutant is not None:
@@ -276,7 +275,7 @@ class Game:
 
                     if alien.x < -3000 or alien.x > 3000:
                         self._aliens.remove(alien)
-                        self._aliens.append(Alien(self._screen, self.plane))
+                        self._aliens.append(Alien(self._screen, self.plane,self.planet))
                     if alien.y <= 0 and alien.carrying_person:
                         self._aliens.remove(alien)
                         if len(self._mutants) < (self.planet):

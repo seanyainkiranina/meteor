@@ -11,7 +11,7 @@ from lib.bullet import Bullet  # pylint: disable=[E0611,W0611]
 class Alien:
     """Alien class represents an alien that moves across the screen and can fire bullets at the player's plane."""
 
-    def __init__(self, screen, plane):
+    def __init__(self, screen, plane,planet):
         self._screen = screen
         self._speed = 1
         self._hunting = False
@@ -19,7 +19,7 @@ class Alien:
         self._right = False
         self._insights = False
         self._visible = True
-        self._speed = random.randint(2, 10)
+        self._speed = random.randint(2, planet +2)
         images = ["alien","bob_ross","chopper","ewok","mutant_chopper","mutant_drone"]
         image = random.choice(images)
         self._image_right = pygame.image.load(f"player\\{image}.png").convert_alpha()
@@ -46,6 +46,8 @@ class Alien:
             self._world_x = 2000 + plane.world_x
             self._image = self._image_left
 
+        self._speed = random.randint(1, 20)  # Randomize speed for more dynamic movement
+ 
         self._y = random.randint(self._image.get_height(), screen.get_height() - self._image.get_height())
         self._x = self._world_x  # initial screen projection
 
@@ -186,7 +188,7 @@ class Alien:
                 if self._x < self._person.x - 3:
                     self._x += self._speed
                 if self._x > self._person.x - (self._image.get_width() //2) and self._x < self._person.x + (self._image.get_width() //2):
-                    if  self._y > 600 - self._image.get_height():
+                    if  self._y > 590 - self._image.get_height():
                         self._person.visible = False
                         self._carrying_person = True
                         self._hunting = False
@@ -250,7 +252,6 @@ class Alien:
         if self._bullet is not None and plane.resetting is True:
             self._bullet = None  # Remove bullet after hitting the plane
 
-        self._speed = random.randint(2, 10)  # Randomize speed for more dynamic movement
         if self._right:
             self._x += self._speed
             self._image = self._image_right
