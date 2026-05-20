@@ -198,7 +198,9 @@ class Game:
         bullets_to_remove = []
         bullet = None
         hunting_set = False
+        alarm = False
         while running:
+            alarm = False
             hunting_set = False
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -305,6 +307,8 @@ class Game:
                 if self.plane.using_smart_bombs:
                     meteor.explode()
 
+                if self.plane.x > meteor.x and self.plane.x < meteor.x + meteor.asteroid.get_width():
+                    alarm = True
                 if loop % 5 == 0:
                     for mm in meteors:
                         if mm == meteor:
@@ -400,6 +404,9 @@ class Game:
             score_text += f"Meteors:{len(meteors)} "
             score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet} "
             score_text += f"People:{self.map_city.people.number_of_people()}"
+            if alarm:
+                score_text +=" Meteor!"
+
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
             )
