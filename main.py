@@ -55,7 +55,7 @@ class Game:
         self.layer3 = pygame.image.load(
             f"backgrounds\\layer{self.planet}.png"
         ).convert_alpha()  # foreground
-
+        self.camera = None
         # Parallax speeds
         self.speed1 = 1
         self.speed2 = 2

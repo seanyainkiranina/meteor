@@ -12,6 +12,7 @@ class Meteor:
     def __init__(self, width, height, world_x=0, planet=1,prefix=None, x=None, y=None):
         self._asteroids = []
         self._planet = planet
+        self._speed =  random.randint(1, self._planet +3)
         if x is None or y is None:
             self._x = random.randint(0, width)
             self._y = random.randint(-2000, -200)  # Start above the screen
@@ -104,8 +105,15 @@ class Meteor:
             "J4_",
             "J5_",
             "J6_",
+            "K1",
+            "K2",
+            "K3",
+            "K4",
+            "K5"
         ]
         self._prefix = random.choice(self._prefixs)
+        if self._prefix[0] == "K":
+            self._speed = random.randint(self._planet,self._planet+5)
         self._id = self._prefix + str(
             random.randint(1, 1000000)
         )  # Unique ID for the meteor
@@ -115,9 +123,14 @@ class Meteor:
                 f"images\\rot\\{prefix}.png"
             ).convert_alpha()
         else:
-            self._asteroid = pygame.image.load(
-                f"images\\rot\\{self._prefix}0.png"
-            ).convert_alpha()
+            if  self.prefix[0] != "K":
+                self._asteroid = pygame.image.load(
+                    f"images\\rot\\{self._prefix}0.png"
+                ).convert_alpha()
+            else:
+                self._asteroid = pygame.image.load(
+                    f"images\\{self._prefix}.png"
+                ).convert_alpha()
         self._r = 0
 
     def screen_to_world_x(self, screen_x, camera_x, screen_width):
@@ -137,9 +150,15 @@ class Meteor:
             self._r += 1
             if self._r > 360:
                 self._r = 0
-            self._asteroid = pygame.image.load(
-                f"images\\rot\\{self._prefix}{self._r}.png"
-            ).convert_alpha()
+            if self.prefix[0] !="K":
+                self._asteroid = pygame.image.load(
+                    f"images\\rot\\{self._prefix}{self._r}.png"
+                ).convert_alpha()
+            else:
+                self._asteroid = pygame.image.load(
+                    f"images\\{self._prefix}.png"
+                ).convert_alpha()
+
         self.rotation_speed -= 1
         if self.rotation_speed < 0:
             self.rotation_speed = random.randint(1, 100)
@@ -210,9 +229,10 @@ class Meteor:
         newprefix = next_step + self.prefix[1:]
         if newprefix in self._prefixs:
             self.prefix = next_step + self.prefix[1:]
-            self._asteroid = pygame.image.load(
-                f"images\\rot\\{self._prefix}{self._r}.png"
-            ).convert_alpha()
+            if self.prefix[0] !="K":
+                self._asteroid = pygame.image.load(
+                    f"images\\rot\\{self._prefix}{self._r}.png"
+                ).convert_alpha()
             if (
                 last_width < self.asteroid.get_width()
                 or last_height < self.asteroid.get_height()
@@ -255,8 +275,8 @@ class Meteor:
 
     def move(self, plane, rotate=False):
         """Move the asteroid downwards."""
-        speed = random.randint(1, self._planet +1)
-        self._y += speed  # Move down by a random speed
+
+        self._y += self._speed  # Move down by a random speed
         # Convert world → screen for drawing
         self._x = self._world_x - plane.world_x + self._width // 2
         if self._y > self._height:
