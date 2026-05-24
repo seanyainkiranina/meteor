@@ -1,5 +1,6 @@
 """Stargate class for the Meteor game."""
 
+import random
 import pygame
 
 
@@ -16,11 +17,11 @@ class Stargate:
         self._which = -1
         self._diff_x = 0
         self._max = len(self._stargates) - 1
-        first = 0
+        first = 0 - random.randint(0,6000)
         for _ in range(0, self._max):
             self._stargates_x.append(self._screen.get_width() // 2)
             self._stargates_positions.append(first)
-            first += 6000
+            first += 12000
     @property
     def x(self):
         """Get the current x position of the city."""
