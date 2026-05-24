@@ -9,15 +9,22 @@ class Stargate:
 
     def __init__(self, screen):
         self._stargates = []
+        self._stargate = []
         self._stargates_x = []
         self._stargates_positions = [0]
         self._screen = screen
         self._stargates.append(pygame.image.load("backgrounds\\stargate.png").convert_alpha())
         self._stargates.append(pygame.image.load("backgrounds\\stargate.png").convert_alpha())
+        for x in range(1,9):
+            self._stargate.append(pygame.image.load(f"backgrounds\\stargate{x}.png").convert_alpha())
+        
         self._which = -1
         self._diff_x = 0
+        self._min_city = random.randint(0,3)
+        self._max_city = self._min_city +1
         self._max = len(self._stargates) - 1
         first = 0 - random.randint(0,6000)
+        self._counter = 1
         for _ in range(0, self._max):
             self._stargates_x.append(self._screen.get_width() // 2)
             self._stargates_positions.append(first)
@@ -66,6 +73,15 @@ class Stargate:
 
     def draw(self, which_city, world_x, increment=0):
         """Draw the city layers on the screen."""
+        self._counter +=1
+        if self._counter % 10 ==0:
+            animation = self._counter // 10
+            if animation> len(self._stargate)-1:
+                animation=0
+            self._stargates[1] = self._stargate[animation]
+            self._stargates[0] = self._stargate[animation]
+        if self._counter>90:
+            self._counter = 0
         if which_city <= self._max:
             self._which = which_city
             screen_x = self._stargates_positions[which_city] - world_x + self._screen.get_width() // 2 
