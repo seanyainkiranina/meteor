@@ -10,12 +10,13 @@ class Stargate:
     def __init__(self, screen):
         self._stargates = []
         self._stargate = []
+        self._direction = 1
         self._stargates_x = []
         self._stargates_positions = [0]
         self._screen = screen
         self._stargates.append(pygame.image.load("backgrounds\\stargate.png").convert_alpha())
         self._stargates.append(pygame.image.load("backgrounds\\stargate.png").convert_alpha())
-        for x in range(1,9):
+        for x in range(1,19):
             self._stargate.append(pygame.image.load(f"backgrounds\\stargate{x}.png").convert_alpha())
         
         self._which = -1
@@ -73,11 +74,16 @@ class Stargate:
 
     def draw(self, which_city, world_x, increment=0):
         """Draw the city layers on the screen."""
-        self._counter +=1
+
+        self._counter +=self._direction
         if self._counter % 10 ==0:
             animation = self._counter // 10
             if animation> len(self._stargate)-1:
+                animation=len(self._stargate)-1
+                self._direction=-1
+            if animation<0:
                 animation=0
+                self._direction=1
             self._stargates[1] = self._stargate[animation]
             self._stargates[0] = self._stargate[animation]
         if self._counter>90:
