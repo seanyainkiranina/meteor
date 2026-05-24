@@ -255,7 +255,7 @@ class Plane:
             self._image.get_height(), 600 - self._image.get_height()
         )
         self._world_x = random.randint(
-            self._world_x - self._width, self._world_x + self._width
+            self._world_x - self._width -3000, self._world_x + self._width + 30000
         )
 
     def move(self):

@@ -211,7 +211,7 @@ class Game:
             # Update positions
             if self.plane.y == 0:
                 if self.plane.carrying_person:
-                    self.plane.add_score(200 * self.planet)
+                    self.plane.add_score(100 * self.planet)
                     self.plane.carrying_person = False
             # Draw layers (two copies each for looping)
             if self.plane.lives <= 0:
