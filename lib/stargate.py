@@ -57,6 +57,18 @@ class Stargate:
         stargate_rect = self._stargates[self._which].get_rect(topleft=(self.x, self.y))
         return plane_rect.colliderect(stargate_rect)
 
+    def pos(self,world_x,which):
+        """ get nearest stargate """
+        positon="<"
+        if which>1:
+            return ">"
+        if which<1:
+            return ">"
+        for i in range(0, self._max):
+            if world_x< self._stargates_positions[i]:
+                positon =">"
+        return positon
+
     def display(self, world_x, diff_x):
         """display a city"""
         self._diff_x = diff_x

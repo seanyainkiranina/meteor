@@ -83,7 +83,7 @@ class Game:
             "player\\plane.png",
         )  # Player's plane
         for _ in range(random.randint(1, 5)):
-            self._aliens.append(Alien(self._screen, self.plane,self.planet))
+            self._aliens.append(Alien(self._screen, self.plane, self.planet))
         self.background = ParallaxBackground(
             [
                 ParallaxLayer(self.layer1, 0.2),  # far
@@ -123,7 +123,7 @@ class Game:
         self._aliens = []
         self._mutants = []
         for _ in range(random.randint(1, self.number_aliens)):
-            self._aliens.append(Alien(self._screen, self.plane,self.planet))
+            self._aliens.append(Alien(self._screen, self.plane, self.planet))
 
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
@@ -154,7 +154,7 @@ class Game:
         self.background = None  # Will be initialized in run()
         self._aliens = []
         for _ in range(random.randint(1, self.number_aliens)):
-            self._aliens.append(Alien(self._screen, self.plane,self.planet))
+            self._aliens.append(Alien(self._screen, self.plane, self.planet))
 
         # X positions for each layer (two copies for seamless looping)
         self.x1 = 0
@@ -187,7 +187,10 @@ class Game:
         self.map_city = Map(self._screen)
         meteors = [
             Meteor(
-                self._screen.get_width(), self._screen.get_height(), self.plane.world_x,self.planet
+                self._screen.get_width(),
+                self._screen.get_height(),
+                self.plane.world_x,
+                self.planet,
             )
             for _ in range(5)
         ]
@@ -218,14 +221,15 @@ class Game:
                 running = False
             self.plane.move()
             self.plane.remove_missles()
-            self.camera.update(self.plane.world_x)
+            if self.camera is not None:
+                self.camera.update(self.plane.world_x)
             if self.background is not None:
                 self.background.draw(self._screen, self.camera.x)
             self._right = self.plane.direction
             # print(f"Plane direction: {'Right' if self._right else 'Left'}")
             self._screen.blit(self.plane.image, (self.plane.x, self.plane.y))
 
-            if len(self.plane.fired_missle) >0:
+            if len(self.plane.fired_missle) > 0:
                 for missle in self.plane.fired_missle:
                     if missle is not None:
                         missle.move()
@@ -242,12 +246,14 @@ class Game:
                             self._screen.get_width(),
                             self._screen.get_height(),
                             self.plane.world_x,
-                            self.planet
+                            self.planet,
                         )
                     )
                 if len(self._aliens) < (self.number_aliens):
                     for _ in range(random.randint(0, 1)):
-                        self._aliens.append(Alien(self._screen, self.plane,self.planet))
+                        self._aliens.append(
+                            Alien(self._screen, self.plane, self.planet)
+                        )
             loop = 0
             for mutant in self._mutants:
                 if mutant is not None:
@@ -277,7 +283,9 @@ class Game:
 
                     if alien.x < -3000 or alien.x > 3000:
                         self._aliens.remove(alien)
-                        self._aliens.append(Alien(self._screen, self.plane,self.planet))
+                        self._aliens.append(
+                            Alien(self._screen, self.plane, self.planet)
+                        )
                     if alien.y <= 0 and alien.carrying_person:
                         self._aliens.remove(alien)
                         if len(self._mutants) < (self.planet):
@@ -307,7 +315,10 @@ class Game:
                 if self.plane.using_smart_bombs:
                     meteor.explode()
 
-                if self.plane.x > meteor.x and self.plane.x < meteor.x + meteor.asteroid.get_width():
+                if (
+                    self.plane.x > meteor.x
+                    and self.plane.x < meteor.x + meteor.asteroid.get_width()
+                ):
                     alarm = True
                 if loop % 5 == 0:
                     for mm in meteors:
@@ -332,10 +343,12 @@ class Game:
                     meteor.explode()
                     self.plane.add_score(3 * self.planet)
                     self.plane.hit_on_shield()
-                if len(self.plane.fired_missle) >0:
+                if len(self.plane.fired_missle) > 0:
                     for rocket in self.plane.fired_missle:
-                        if rocket is not None and rocket.image is not None and rocket.hit_check(
-                            meteor
+                        if (
+                            rocket is not None
+                            and rocket.image is not None
+                            and rocket.hit_check(meteor)
                         ):
                             meteor.explode()
                             self.plane.add_score(10 * self.planet)
@@ -372,7 +385,7 @@ class Game:
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
-                    self.planet = random.randint(1, 15)
+                    self.planet = random.randint(1, 16)
                     self.layer3 = pygame.image.load(
                         f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()
@@ -391,7 +404,7 @@ class Game:
                 self.map_city.diamond.move()
                 if self.plane is not None and self.plane.image is not None:
                     if self.map_city.diamond.hit_player_check(self.plane):
-                        self.plane.add_shield(100)
+                        self.plane.add_shield(100 * self.planet)
                         self.map_city.diamond.hit = True
                         self.map_city.diamond.y = 600
                         self.map_city.diamond = None
@@ -401,14 +414,17 @@ class Game:
                 f"Bombs:{self.plane.smart_bombs} Shield:{self.plane.shield_time} "
             )
             score_text += f"Score:{self.plane.score} Lives:{self.plane.lives} "
-            score_text += f"Meteors:{len(meteors)} "
-            score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet} "
-            score_text += f"People:{self.map_city.people.number_of_people()}"
             if alarm:
-                score_text +=" Meteor!"
+                score_text += " Meteor!"
 
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 0)), (10, 10)
+            )
+            score_text = f"Meteors:{len(meteors)} "
+            score_text += f"Aliens:{len(self._aliens)} Planet:{self.planet} "
+            score_text += f"People:{self.map_city.people.number_of_people()}"
+            self._screen.blit(
+                self.font.render(score_text, True, (255, 255, 255)), (10, 580)
             )
 
             pygame.display.flip()
