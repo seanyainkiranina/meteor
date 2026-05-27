@@ -14,7 +14,7 @@ class StartScreen:
 
     def __init__(self, screen):
         self._screen = screen
-        self._font = pygame.font.SysFont("consolas", 23)
+        self._font = pygame.font.SysFont("consolas", 17)
         self._starting = 1
         self._high_score = -1000
         self._score_board = Score()
@@ -37,11 +37,11 @@ class StartScreen:
         """Game Instructions"""
         instruct = []
         instruct.append("Welcome to Meteor")
-        instruct.append("Space bar to fire arrows to move")
-        instruct.append("s for shields on d for shields off")
+        instruct.append("Space bar to fire, arrows to move")
+        instruct.append("s for shields on, d for shields off")
         instruct.append("f to toggle speed burst, g for hyper space jump")
         instruct.append("a to fire smart bomb ")
-        instruct.append("Bringing a person to the top of the screen minimum 100 pts")
+        instruct.append("Bringing a person to the top of the screen minimum 100 * planet pts")
         instruct.append("Extra life after every 1000 points")
         instruct.append("Esc to exit")
         instruct.append("Anykey to Start")
