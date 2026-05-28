@@ -29,7 +29,7 @@ from lib.map import Map
 from lib.startscreen import StartScreen
 from lib.alien import Alien
 from lib.mutant import Mutant
-
+from lib.minimap import MiniMap
 
 class Game:
     """Main game class to handle the parallax scrolling effect."""
@@ -61,6 +61,8 @@ class Game:
         self.speed2 = 2
         self.speed3 = 4
         self.map_city = None
+
+        self.displaying_map = False
 
         self._right = False
 
@@ -211,6 +213,8 @@ class Game:
                 if event.type == pygame.K_ESCAPE:
                     running = False
 
+            self.displaying_map = self.plane.display_map
+            
             # Update positions
             if self.plane.y == 0:
                 if self.plane.carrying_person:
@@ -385,7 +389,7 @@ class Game:
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
-                    self.planet = random.randint(1, 21)
+                    self.planet = random.randint(1, 22)
                     self.layer3 = pygame.image.load(
                         f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()
@@ -426,6 +430,12 @@ class Game:
             self._screen.blit(
                 self.font.render(score_text, True, (255, 255, 255)), (10, 580)
             )
+
+    
+            # inside update/draw loop
+            if self.displaying_map is True:
+                mini_map = MiniMap(self._screen)
+                mini_map.draw(self.plane, meteors, self._aliens, self.map_city.people.get_people)
 
             pygame.display.flip()
 

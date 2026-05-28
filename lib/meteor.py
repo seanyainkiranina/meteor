@@ -109,7 +109,8 @@ class Meteor:
             "K2",
             "K3",
             "K4",
-            "K5"
+            "K5",
+            "L1_"
         ]
         self._prefix = random.choice(self._prefixs)
         if self._prefix[0] == "K":
@@ -136,6 +137,10 @@ class Meteor:
     def screen_to_world_x(self, screen_x, camera_x, screen_width):
         """Convert screen x coordinate to world x coordinate based on camera position and screen width."""
         return screen_x + camera_x - screen_width // 2
+    @property
+    def world_x(self):
+        """ get world x"""
+        return self._world_x
 
     @property
     def id(self):

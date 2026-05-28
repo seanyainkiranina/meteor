@@ -60,6 +60,12 @@ class Plane:
         self._exploding = False  # Flag to indicate if the plane is currently exploding
         self._explosion_frame = 0
         self._reset = False
+        self._display_map = False
+
+    @property
+    def display_map(self):
+        """ get display map"""
+        return self._display_map
 
     @property
     def carrying_person(self):
@@ -268,6 +274,13 @@ class Plane:
         if self._counter > 50 and self._jumped:
             self._jumped = False
             self._counter = 0
+
+        if keys[pygame.K_m] and self._jumped is False:
+            if self._display_map is True:
+                self._display_map = False
+            else:
+                self._display_map = True
+            self._jumped = True
 
         if keys[pygame.K_ESCAPE]:
             self.geme_over = True

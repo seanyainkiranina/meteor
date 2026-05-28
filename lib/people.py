@@ -3,6 +3,7 @@
 import random
 import pygame
 
+from lib.survivor import Survivor
 
 class People:
     """City class for the Meteor game."""
@@ -11,6 +12,7 @@ class People:
         self._people = []
         self._people_x = []
         self._display = []
+        self._survivors = []
         self._people_positions = [0]
         self._screen = screen
         for _ in range(0, 15):
@@ -22,11 +24,13 @@ class People:
         self._diff_x = 0
         self._max = len(self._people) - 1
         first = -9000
-        for _ in range(0, self._max):
+        for i in range(0, self._max):
             self._display.append(True)
             self._people_x.append(self._screen.get_width() // 3)
             self._people_positions.append(first)
+            self._survivors.append(Survivor(first,self._screen.get_height() - 30,i))
             first += 3000
+            
 
     @property
     def x(self):
@@ -75,6 +79,9 @@ class People:
         checked = rock_rect.colliderect(person_rect)
         if checked:
             self._display[self._which] = False
+            for survivor in  self._survivors:
+                if survivor.which == self._which:
+                    survivor.visible = False
         return checked
 
     def impact_check(self, rock):
@@ -84,7 +91,16 @@ class People:
         checked = rock_rect.colliderect(person_rect)
         if checked:
             self._display[self._which] = False
+            for survivor in  self._survivors:
+                if survivor.which == self._which:
+                    survivor.visible = False
+
         return checked
+
+    @property
+    def get_people(self):
+        """ return people"""
+        return self._survivors
 
     def get_person(self):
         """return self"""
@@ -105,6 +121,10 @@ class People:
         checked = plane_rect.colliderect(person_rect)
         if checked:
             self._display[self._which] = False
+            for survivor in  self._survivors:
+                if survivor.which == self._which:
+                    survivor.visible = False
+
         return checked
 
     def reborn(self):

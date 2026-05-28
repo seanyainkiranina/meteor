@@ -19,6 +19,7 @@ class Alien:
         self._right = False
         self._insights = False
         self._visible = True
+        self._planet = planet
         self._speed = random.randint(2, planet +2)
         images = ["alien","bob_ross","chopper","ewok","mutant_chopper","mutant_drone"]
         image = random.choice(images)
@@ -50,6 +51,11 @@ class Alien:
  
         self._y = random.randint(self._image.get_height(), screen.get_height() - self._image.get_height())
         self._x = self._world_x  # initial screen projection
+
+    @property
+    def world_x(self):
+        """ get world x """
+        return self._world_x
 
     @property
     def carrying_person(self):
@@ -137,7 +143,7 @@ class Alien:
                 self._image = self._explosion
                 self._visible = False
                 plane.add_score(
-                    150
+                    50 * self._planet
                 )  # Award points for hitting the alien with a smart bomb
                 return
 
@@ -147,7 +153,7 @@ class Alien:
                 self._image = self._explosion
                 self._visible = False
                 plane.add_score(
-                    50
+                    50 * self._planet
                 )  # Award points for hitting the alien with the shield on
                 return
             plane.explode()
@@ -175,7 +181,19 @@ class Alien:
             if abs(plane.x - self._x) < 50:
                 self._insights = True
 
-        if self._hunting and self._carrying_person is False:
+        if len(missle)>0:
+            for m in missle:
+                if m is None or m.image is None:
+                    continue
+                missle_rect = m.image.get_rect(topleft=(m.x(), m.y()))
+                if missle_rect.colliderect(alien_rect):
+                    self._image = self._explosion
+                    self._visible = False
+                    plane.add_score(100 * self._planet)
+                    return
+
+
+        if self._hunting and self._carrying_person is False and self._visible is True:
             if self._person is not None:
                 if self._person.x < self.x:
                     self._right = False
@@ -211,17 +229,6 @@ class Alien:
 
         if self._bullet is not None and self._bullet.image is None:
             self._bullet = None  # Remove bullet if it goes off-screen
-
-        if len(missle)>0:
-            for m in missle:
-                if m is None or m.image is None:
-                    continue
-                missle_rect = m.image.get_rect(topleft=(m.x(), m.y()))
-                if missle_rect.colliderect(alien_rect):
-                    self._image = self._explosion
-                    self._visible = False
-                    plane.add_score(100)
-                    return
 
         if not self._visible and self._explosion_frames > 0:
             self._explosion_frames -= 1
