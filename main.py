@@ -214,7 +214,7 @@ class Game:
                     running = False
 
             self.displaying_map = self.plane.display_map
-            
+
             # Update positions
             if self.plane.y == 0:
                 if self.plane.carrying_person:
@@ -435,7 +435,8 @@ class Game:
             # inside update/draw loop
             if self.displaying_map is True:
                 mini_map = MiniMap(self._screen)
-                mini_map.draw(self.plane, meteors, self._aliens, self.map_city.people.get_people)
+                mini_map.draw(self.plane, meteors, self._aliens, 
+                              self.map_city.people.get_people,self.map_city.stargate,self._mutants)
 
             pygame.display.flip()
 

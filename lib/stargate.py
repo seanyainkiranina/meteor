@@ -34,6 +34,10 @@ class Stargate:
     def x(self):
         """Get the current x position of the city."""
         return self._stargates_x[self._which]
+    @property
+    def world_x(self):
+        return self._stargates_x[self._which]
+
 
     @property
     def y(self):

@@ -59,6 +59,11 @@ class Mutant:
         self._person = value
 
     @property
+    def world_x(self):
+        """get world x"""
+        return self._world_x
+
+    @property
     def hunting(self):
         """return if hunting"""
         return self._hunting
