@@ -14,6 +14,10 @@ class Survivor:
     def which(self):
         """which Survivor"""
         return self._which
+    @which.setter
+    def which(self,value):
+        """ set which """
+        self._which =value
 
     @property
     def visible(self):

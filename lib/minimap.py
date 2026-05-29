@@ -41,6 +41,8 @@ class MiniMap:
         # --- PLANE ---
         px, py = world_to_map(plane.world_x, plane.y)
         pygame.draw.circle(self._surface, (0, 255, 0), (px, py), 3)
+        if plane.carrying_person:
+            pygame.draw.circle(self._surface, (0, 150, 255), (px, py+4), 5)
 
         if camera_left <= stargate.world_x <= camera_right:
             mx, my = world_to_map(stargate.world_x, stargate.y)
@@ -69,7 +71,7 @@ class MiniMap:
             if p.visible is True:
                 if camera_left <= p.world_x <= camera_right:
                     mx, my = world_to_map(p.world_x, p.y)
-                    pygame.draw.circle(self._surface, (0, 150, 255), (mx, my), 2)
+                    pygame.draw.circle(self._surface, (0, 150, 255), (mx, my), 5)
 
         # Draw mini-map in top-right corner
         self._screen.blit(

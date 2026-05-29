@@ -149,6 +149,11 @@ class People:
             if self._display[self._which]:
                 self._visible = True
                 self.draw(i, world_x, diff_x)
+                for s in self._survivors:
+                    if s.world_x > self._people_positions[i] - 2000:
+                        if s.world_x < self._people_positions[i] + 1000:
+                            s.which = i
+                            s.visible = True
             return True
         return False
 

@@ -327,6 +327,11 @@ class Plane:
         if keys[pygame.K_RIGHT] and not self._exploding:
             self._world_x += self._speed
 
+        if self._world_x<-12000:
+            self._world_x=12000
+        if self._world_x>12000:
+            self._world_x =-12000
+
         if (
             keys[pygame.K_f]
             and not self._exploding

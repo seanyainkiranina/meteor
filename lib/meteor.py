@@ -113,6 +113,8 @@ class Meteor:
             "L1_"
         ]
         self._prefix = random.choice(self._prefixs)
+        if self._prefix == "L1_":
+            self.rotation_speed = 22
         if self._prefix[0] == "K":
             self._speed = random.randint(self._planet,self._planet+5)
         self._id = self._prefix + str(
