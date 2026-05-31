@@ -4,6 +4,7 @@ import random
 import time
 import pygame
 from lib.missle import Missle
+from lib.laserbeam import LaserBeam
 
 
 class Plane:
@@ -28,6 +29,7 @@ class Plane:
         self._width = width
         self._height = height
         self._last = None
+        self._last_laser_y = -1
         self._shield_time = 1000
         self._right = True  # Direction the plane is facing
         self._image_left = pygame.image.load(filename).convert_alpha()
@@ -64,8 +66,34 @@ class Plane:
 
     @property
     def display_map(self):
-        """ get display map"""
+        """get display map"""
         return self._display_map
+
+    def fire_laser(self, lasers):
+        """fire a laser"""
+        direction = 1
+        if self._shield_time < 20:
+            return
+        half_plane = self._image.get_width() * direction
+        if self._shield_on:
+            return
+        if self._exploding:
+            lasers.clear()
+            return
+        if len(lasers) > 2:
+            return
+        if self._last_laser_y > -1 and self._last_laser_y != self.y and len(lasers)>0:
+            return
+        self._shield_time -=20
+        self._last_laser_y = self.y
+
+        if self._right:
+            direction = -1
+            half_plane = 0
+
+        nose_y = self.y + self._image.get_height() // 2
+        nose_x = self.x + half_plane
+        lasers.append(LaserBeam(nose_x, nose_y, direction))
 
     @property
     def carrying_person(self):
@@ -140,12 +168,13 @@ class Plane:
     def remove_missles(self):
         """remove missles"""
         if isinstance(self._missles, list) is False:
-            self._missles=[]
+            self._missles = []
 
-        if len(self._missles)==0:
+        if len(self._missles) == 0:
             return
         self._missles = [
-            m for m in self._missles
+            m
+            for m in self._missles
             if m is not None and getattr(m, "image", None) is not None
         ]
 
@@ -261,10 +290,10 @@ class Plane:
             self._image.get_height(), 600 - self._image.get_height()
         )
         self._world_x = random.randint(
-            self._world_x - self._width -3000, self._world_x + self._width + 30000
+            self._world_x - self._width - 3000, self._world_x + self._width + 30000
         )
 
-    def move(self):
+    def move(self, lasers):
         """Move the plane to the left by its speed."""
         keys = pygame.key.get_pressed()
         self._counter += 1
@@ -289,6 +318,9 @@ class Plane:
             if self._shield_on:
                 self._y += self._shield_left.get_height() // 2
             self._shield_on = False
+
+        if keys[pygame.K_z]:
+            self.fire_laser(lasers)
 
         if keys[pygame.K_s]:
             if self._shield_time > 0 and self._carrying_person is False:
@@ -327,10 +359,10 @@ class Plane:
         if keys[pygame.K_RIGHT] and not self._exploding:
             self._world_x += self._speed
 
-        if self._world_x<-12000:
-            self._world_x=12000
-        if self._world_x>12000:
-            self._world_x =-12000
+        if self._world_x < -12000:
+            self._world_x = 12000
+        if self._world_x > 12000:
+            self._world_x = -12000
 
         if (
             keys[pygame.K_f]
@@ -359,9 +391,9 @@ class Plane:
             # Fire a missle if space is pressed and there isn't already one on screen
             if len(self._missles) > 2:
                 return
-            fired_rocket_x = ((self._image.get_width() // 2) * len(self._missles))
+            fired_rocket_x = (self._image.get_width() // 2) * len(self._missles)
             if self._right:
-                fired_rocket_x = 0- fired_rocket_x
+                fired_rocket_x = 0 - fired_rocket_x
             self._missle = Missle(
                 self._x + fired_rocket_x,
                 self._y,
@@ -373,7 +405,7 @@ class Plane:
             self._missle.direction = self._right
             if self._missles is None:
                 self._missles = []
-            self._missles.append(self._missle) # type: ignore
+            self._missles.append(self._missle)  # type: ignore
             self._missle = None  # Set missle direction to match plane
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = max(0, min(self._height - self._image.get_height(), self._y))

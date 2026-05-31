@@ -41,6 +41,8 @@ class StartScreen:
         instruct.append("s for shields on, d for shields off")
         instruct.append("f to toggle speed burst, g for hyper space jump")
         instruct.append("a to fire smart bomb, m to toggle minimap ")
+        instruct.append("z to fire laser. Shields and lasers depleat energy")
+        instruct.append("Impacting a blue bubble increases Energy")
         instruct.append("Bringing a person to the top of the screen minimum 100 * planet pts")
         instruct.append("Extra life after every 1000 points")
         instruct.append("Esc to exit")

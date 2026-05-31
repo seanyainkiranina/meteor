@@ -5,17 +5,19 @@ import pygame
 
 from lib.meteor import Meteor  # pylint: disable=[E0611,W0611]
 from lib.bullet import Bullet  # pylint: disable=[E0611,W0611]
+from lib.laserbeam import LaserBeam  # pylint: disable=[E0611,W0611]
 # from lib.people import People
 
 
 class Mutant:
     """Mutant class represents an Mutant that moves across the screen and can fire bullets at the player's plane."""
 
-    def __init__(self, screen, plane):
+    def __init__(self, screen, plane,planet):
         filenames = ["mutant.png","defender_mutant.png"]
         filename = random.choice(filenames)
         self._screen = screen
         self._speed = 3
+        self._planet = planet
         self._hunting = False
         self._bullet = None
         self._right = False
@@ -98,7 +100,7 @@ class Mutant:
         """Set the bullet of the Mutant."""
         self._bullet = value
 
-    def move(self, meteors, plane, Mutants, missle):
+    def move(self, meteors, plane, Mutants, missle, lasers):
         """Move the Mutant using world coordinates."""
         lookahead_distance = 100
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
@@ -119,6 +121,15 @@ class Mutant:
         ):
             return
 
+        if len(lasers)>0:
+            for l in lasers[:]:
+                if l.hit(mutant_rect):
+                    self._image = self._explosion
+                    self._visible = False
+                    plane.add_score(200 * self._planet)
+                    return
+
+
         if plane.using_smart_bombs:
             # Check if the Mutant is within the smart bomb's blast radius
             smart_bomb_radius = 200  # Example radius for the smart bomb
@@ -129,7 +140,7 @@ class Mutant:
                 self._image = self._explosion
                 self._visible = False
                 plane.add_score(
-                    150
+                    200 * self._planet
                 )  # Award points for hitting the Mutant with a smart bomb
                 return
 
@@ -139,7 +150,7 @@ class Mutant:
                 self._image = self._explosion
                 self._visible = False
                 plane.add_score(
-                    50
+                    100 * self._planet
                 )  # Award points for hitting the Mutant with the shield on
                 return
             plane.explode()
@@ -193,7 +204,7 @@ class Mutant:
                 if missle_rect.colliderect(mutant_rect):
                     self._image = self._explosion
                     self._visible = False
-                    plane.add_score(100)
+                    plane.add_score(200 * self._planet)
                     return
 
         if not self._visible and self._explosion_frames > 0:

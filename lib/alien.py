@@ -5,6 +5,7 @@ import pygame
 
 from lib.meteor import Meteor  # pylint: disable=[E0611,W0611]
 from lib.bullet import Bullet  # pylint: disable=[E0611,W0611]
+from lib.laserbeam import LaserBeam  # pylint: disable=[E0611,W0611]
 # from lib.people import People
 
 
@@ -112,7 +113,7 @@ class Alien:
         """Set the bullet of the alien."""
         self._bullet = value
 
-    def move(self, meteors, plane, aliens, missle):
+    def move(self, meteors, plane, aliens, missle,lasers):
         """Move the alien using world coordinates."""
         lookahead_distance = 50
         plane_rect = plane.image.get_rect(topleft=(plane.x, plane.y))
@@ -180,6 +181,14 @@ class Alien:
             self._image = self._image_left
             if abs(plane.x - self._x) < 50:
                 self._insights = True
+
+        if len(lasers)>0:
+            for l in lasers[:]:
+                if l.hit(alien_rect):
+                    self._image = self._explosion
+                    self._visible = False
+                    plane.add_score(100 * self._planet)
+                    return
 
         if len(missle)>0:
             for m in missle:

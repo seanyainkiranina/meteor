@@ -23,6 +23,8 @@ class MiniMap:
         # CAMERA WINDOW IN WORLD COORDINATES
         camera_left = plane.world_x - screen_w // 2
         camera_right = plane.world_x + screen_w // 2
+        camera_left -=1000
+        camera_right +=1000
         camera_width = camera_right - camera_left
 
         # Clear mini-map
@@ -61,10 +63,13 @@ class MiniMap:
 
         # --- ALIENS ---
         for a in aliens:
-            if camera_left <= a._world_x <= camera_right:
+            if camera_left <= a.world_x <= camera_right:
                 mx, my = world_to_map(a.world_x, a.y)
                 color = (255, 0, 0) if a.hunting else (150, 0, 0)
                 pygame.draw.circle(self._surface, color, (mx, my), 2)
+                if a.carrying_person:
+                    pygame.draw.circle(self._surface, (0, 150, 255), (mx, my+4), 5)
+ 
 
         # --- PEOPLE ---
         for p in people:
