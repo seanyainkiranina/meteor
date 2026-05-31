@@ -119,6 +119,15 @@ class Plane:
         lasers.append(LaserBeam(nose_x, nose_y, direction))
 
     @property
+    def step(self):
+        """ get step"""
+        return self._step
+    @step.setter
+    def step(self,value):
+        """ set step"""
+        self._step = value
+
+    @property
     def carrying_person(self):
         """get carrying person"""
         return self._carrying_person
@@ -225,9 +234,15 @@ class Plane:
 
     def add_score(self, amount):
         """Add score"""
+        if self._step < (self._score + amount):
+            amt = amount
+            if amount > 1000:
+                self._lives += round((amount) / 10000)
+                amt -= round((amount) / 10000) * 10000
+            if self._score + amt > 10000:
+                self._lives += 1
         self._score += amount
-        if (self._score % 1000) == 0 and self._step < self._score:
-            self._lives += 1
+        if amount>0:
             self._step = self._score
 
     def add_shield(self, amount):
@@ -426,6 +441,8 @@ class Plane:
             and not self._exploding
             and not self._shield_on
         ):
+            type_of_fire = random.randint(0,100)
+            which_missle = random.randint(0,3)
             # Fire a missle if space is pressed and there isn't already one on screen
             if len(self._missles) > 2:
                 return
@@ -440,6 +457,13 @@ class Plane:
                 "player\\missle.png",
                 "player\\missle_right.png",
             )
+            if type_of_fire<50 and (len(self._missles) == which_missle):
+                self._missle.up = True
+            if type_of_fire<25 and (len(self._missles) == which_missle):
+                self._missle.up = False
+                self._missle.down = True
+
+
             self._missle.direction = self._right
             if self._missles is None:
                 self._missles = []

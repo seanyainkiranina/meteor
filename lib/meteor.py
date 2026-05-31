@@ -116,7 +116,7 @@ class Meteor:
         if self._prefix == "L1_":
             self.rotation_speed = 22
         if self._prefix[0] == "K":
-            self._speed = random.randint(self._planet,self._planet+5)
+            self._speed = random.randint(self._planet,self._planet+40)
         self._id = self._prefix + str(
             random.randint(1, 1000000)
         )  # Unique ID for the meteor
