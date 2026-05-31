@@ -391,12 +391,12 @@ class Game:
                 self.plane.used_smart_bombs()  # Reset smart bomb usage status
             self.map_city.draw(self.plane.world_x, lastx)
             if self.map_city.ptarget_shown:
-                if self.map_city.people.crash_check(self.plane):
+                if self.map_city.people.crash_check(self.plane) and self.plane.inverse is False:
                     self.plane.add_score(10 * self.planet)
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
-                    self.planet = random.randint(1, 22)
+                    self.planet = random.randint(1, 24)
                     self.layer3 = pygame.image.load(
                         f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()

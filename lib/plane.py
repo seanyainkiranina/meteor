@@ -28,6 +28,7 @@ class Plane:
         self._speed = speed  # Speed at which the plane moves
         self._width = width
         self._height = height
+        self._inverse = False
         self._last = None
         self._last_laser_y = -1
         self._shield_time = 1000
@@ -38,6 +39,13 @@ class Plane:
         ).convert_alpha()
         self._shield_right = pygame.image.load(
             "player\\shield_plane_right.png"
+        ).convert_alpha()
+
+        self._invisible_right = pygame.image.load(
+            "player\\plane_inverse.png"
+        ).convert_alpha()
+        self._invisible = pygame.image.load(
+            "player\\plane_right_inverse.png"
         ).convert_alpha()
 
         self._org_width, self._org_height = self._image_left.get_size()
@@ -65,6 +73,21 @@ class Plane:
         self._display_map = False
 
     @property
+    def invisible(self):
+        """get inverse"""
+        return self._inverse
+
+    @property
+    def inverse(self):
+        """get inverse"""
+        return self._inverse
+
+    @inverse.setter
+    def inverse(self, value):
+        """set inverse"""
+        self._inverse = value
+
+    @property
     def display_map(self):
         """get display map"""
         return self._display_map
@@ -82,9 +105,9 @@ class Plane:
             return
         if len(lasers) > 2:
             return
-        if self._last_laser_y > -1 and self._last_laser_y != self.y and len(lasers)>0:
+        if self._last_laser_y > -1 and self._last_laser_y != self.y and len(lasers) > 0:
             return
-        self._shield_time -=20
+        self._shield_time -= 20
         self._last_laser_y = self.y
 
         if self._right:
@@ -257,6 +280,7 @@ class Plane:
         self._explosion_frame = 0
         self._shield_on = False
         self._shield_time = 1000
+        self._inverse = False
         self._missles = []
         if self._lives <= 0:
             self._game_over = True
@@ -297,12 +321,22 @@ class Plane:
         """Move the plane to the left by its speed."""
         keys = pygame.key.get_pressed()
         self._counter += 1
-        if self._counter > 50 and self._jumped is False:
+        if self._counter > 50:
             self._counter = 0
+            if self._jumped:
+                self._jumped = False
 
-        if self._counter > 50 and self._jumped:
-            self._jumped = False
-            self._counter = 0
+        if keys[pygame.K_q] and self._jumped is False:
+            if (
+                self._shield_time > 0
+                and self._carrying_person is False
+                and self._shield_on is False
+            ):
+                if self._inverse is True:
+                    self._inverse = False
+                else:
+                    self._inverse = True
+            self._jumped = True
 
         if keys[pygame.K_m] and self._jumped is False:
             if self._display_map is True:
@@ -323,7 +357,11 @@ class Plane:
             self.fire_laser(lasers)
 
         if keys[pygame.K_s]:
-            if self._shield_time > 0 and self._carrying_person is False:
+            if (
+                self._shield_time > 0
+                and self._carrying_person is False
+                and self._inverse is False
+            ):
                 if not self._shield_on:
                     self._y -= self._shield_left.get_height() // 2
                 self._shield_on = True
@@ -415,6 +453,11 @@ class Plane:
         if self._right is False and self._exploding is False:
             self._world_x += self._speed
 
+        if self._inverse:
+            self._shield_time -= 1
+            if self._shield_time <= 0:
+                self._inverse = False
+
         if self._shield_on:
             self._shield_time -= 1
             if self._shield_time <= 0:
@@ -443,3 +486,9 @@ class Plane:
                         self._image = self._image_person
                     else:
                         self._image = self._image_left
+
+                if self.inverse:
+                    if not self._right:
+                        self._image = self._invisible
+                    else:
+                        self._image = self._invisible_right

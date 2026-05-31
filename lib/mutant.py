@@ -170,12 +170,12 @@ class Mutant:
         if self._right:
             self._world_x += self._speed
             self._image = self._image_right
-            if abs(plane.x - self._x) < 200:
+            if abs(plane.x - self._x) < 200 and plane.invisible is False:
                 self._insights = True
         else:
             self._world_x -= self._speed
             self._image = self._image_left
-            if abs(plane.x - self._x) < 200:
+            if abs(plane.x - self._x) < 200 and plane.invisible is False:
                 self._insights = True
 
 
