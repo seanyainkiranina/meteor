@@ -441,8 +441,6 @@ class Plane:
             and not self._exploding
             and not self._shield_on
         ):
-            type_of_fire = random.randint(0,100)
-            which_missle = random.randint(0,3)
             # Fire a missle if space is pressed and there isn't already one on screen
             if len(self._missles) > 2:
                 return
@@ -457,9 +455,9 @@ class Plane:
                 "player\\missle.png",
                 "player\\missle_right.png",
             )
-            if type_of_fire<50 and (len(self._missles) == which_missle):
+            if (len(self._missles) == 0):
                 self._missle.up = True
-            if type_of_fire<25 and (len(self._missles) == which_missle):
+            if (len(self._missles) == 1):
                 self._missle.up = False
                 self._missle.down = True
 
