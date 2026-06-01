@@ -453,9 +453,9 @@ class Plane:
             # Fire a missle if space is pressed and there isn't already one on screen
             if len(self._missles) > 2:
                 return
-            fired_rocket_x = (self._image.get_width() // 2) * len(self._missles)
+            fired_rocket_x = (self._image.get_width() // 2)
             if self._right:
-                fired_rocket_x = 0 - fired_rocket_x
+                fired_rocket_x = 0  
             self._missle = Missle(
                 self._x + fired_rocket_x,
                 self._y,
