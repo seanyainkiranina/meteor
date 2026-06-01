@@ -21,6 +21,8 @@ class Plane:
         self._step = 0
         self._game_over = False
         self._score = 0
+        self._free_guy = 50000
+        self._free_energy = 1000
         self._lives = 3
         self._jumped = False
         self._shield_on = False
@@ -236,10 +238,17 @@ class Plane:
         """Add score"""
         if self._step < (self._score + amount):
             amt = amount
-            if amount > 1000:
-                self._lives += round((amount) / 10000)
-                amt -= round((amount) / 10000) * 10000
-            if self._score + amt > 10000:
+            if amount > self._free_energy:
+                self._shield_time += (round((amount) / self._free_energy)) * 100
+                amt -= round((amount) / self._free_energy) * self._free_energy
+            if self._score + amt > self._free_energy:
+                self._shield_time += 100
+        if self._step < (self._score + amount):
+            amt = amount
+            if amount > self._free_guy:
+                self._lives += round((amount) / self._free_guy)
+                amt -= round((amount) / self._free_guy) * self._free_guy
+            if self._score + amt > self._free_guy:
                 self._lives += 1
         self._score += amount
         if amount>0:
@@ -455,9 +464,9 @@ class Plane:
                 "player\\missle.png",
                 "player\\missle_right.png",
             )
-            if (len(self._missles) == 0):
+            if len(self._missles) == 0 and self._y>100:
                 self._missle.up = True
-            if (len(self._missles) == 1):
+            if len(self._missles) == 1 and self.y<700:
                 self._missle.up = False
                 self._missle.down = True
 

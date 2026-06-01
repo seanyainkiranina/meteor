@@ -47,9 +47,10 @@ class City:
                 pygame.image.load("backgrounds\\crater.png").convert_alpha()
             )
             self._cities_positions.append(first)
-     #       print(f"City {index} position set to {first}.")
+            #       print(f"City {index} position set to {first}.")
             first += 6000
-        #print(f"City initialized with {len(self._cities)} cities.")
+        # print(f"City initialized with {len(self._cities)} cities.")
+
     @property
     def x(self):
         """Get the current x position of the city."""
@@ -78,6 +79,7 @@ class City:
     def display(self, world_x, diff_x):
         """display a city"""
         self._diff_x = diff_x
+        city_x = 0
         for i in range(0, self._max):
             if i >= len(self._cities_x):
                 continue
@@ -91,15 +93,16 @@ class City:
             # print(f"City {index} is within range of the camera at position {world_x}.")
             # print(f"city {index} at position {self._cities_positions[index]} where {world_x}.")
             self._which = i
-            self.draw(i, world_x, diff_x)
+            city_x = self.draw(i, world_x, diff_x)
             if random.randint(0, 100) % 75 == 0:
                 if self._diamond is None:
                     self._diamond = Diamond(
-                            self._cities_x[i],
-                            800 - self._cities[i].get_height(),
-                        )
+                        self._cities_x[i],
+                        800 - self._cities[i].get_height(),
+                    )
         if self._diamond is not None and (self._diamond.hit or self._diamond.y < 0):
             self._diamond = None
+        return city_x
 
     def reset(self, which_city):
         """Reset the city layer's position."""
@@ -132,11 +135,23 @@ class City:
         """Draw the city layers on the screen."""
         if which_city <= self._max:
             self._which = which_city
-         #   self._cities_x[which_city] += increment
-         #   print(f"Drawing city {which_city} at x position {self._cities_x[which_city]} with increment {increment}.")
-            screen_x = self._cities_positions[which_city] - world_x + self._screen.get_width() // 2 
-            self._screen.blit(self._cities[which_city], (screen_x, self._screen.get_height() - self._cities[which_city].get_height() + 5))
-        #       print(f"City {which_city} drawn at screen x position {screen_x}.")
-            self._cities_x[which_city]= screen_x
-            return True
-        return False
+            #   self._cities_x[which_city] += increment
+            #   print(f"Drawing city {which_city} at x position {self._cities_x[which_city]} with increment {increment}.")
+            screen_x = (
+                self._cities_positions[which_city]
+                - world_x
+                + self._screen.get_width() // 2
+            )
+            self._screen.blit(
+                self._cities[which_city],
+                (
+                    screen_x,
+                    self._screen.get_height()
+                    - self._cities[which_city].get_height()
+                    + 5,
+                ),
+            )
+            #       print(f"City {which_city} drawn at screen x position {screen_x}.")
+            self._cities_x[which_city] = screen_x
+            return world_x
+        return 0

@@ -114,7 +114,7 @@ class Meteor:
         ]
         self._prefix = random.choice(self._prefixs)
         if self._prefix == "L1_":
-            self.rotation_speed = 22
+            self.rotation_speed = 50
         if self._prefix[0] == "K":
             self._speed = random.randint(self._planet,self._planet+40)
         self._id = self._prefix + str(
@@ -152,7 +152,6 @@ class Meteor:
     @property
     def asteroid(self):
         """Get the asteroid's image."""
-
         if self.rotation_speed % 50 == 0:
             self._r += 1
             if self._r > 360:

@@ -198,7 +198,9 @@ class Game:
         bullet = None
         hunting_set = False
         alarm = False
+        city_shown = False
         while running:
+            city_shown = False
             alarm = False
             hunting_set = False
             for event in pygame.event.get():
@@ -389,10 +391,10 @@ class Game:
 
             if loop % 20 == 0:
                 self.plane.used_smart_bombs()  # Reset smart bomb usage status
-            self.map_city.draw(self.plane.world_x, lastx)
+            city_shown = self.map_city.draw(self.plane.world_x, lastx)
             if self.map_city.ptarget_shown:
                 if self.map_city.people.crash_check(self.plane) and self.plane.inverse is False:
-                    self.plane.add_score(10 * self.planet)
+                    self.plane.add_score(3 * self.planet)
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
@@ -448,6 +450,7 @@ class Game:
                     self.map_city.people.get_people,
                     self.map_city.stargate,
                     self.mutants,
+                    city_shown
                 )
             for laser in self.lasers[:]:
                 laser.update()

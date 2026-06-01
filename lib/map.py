@@ -67,13 +67,15 @@ class Map:
 
     def draw(self, camera_x, lastx):
         """draw city"""
+        city_x=0
         if self._lastx == 0:
             self._lastx = lastx
         diff = self._lastx - lastx
         self._lastx = lastx  # Calculate the difference in camera position
-        self._city.display(camera_x, diff)
+        city_x=self._city.display(camera_x, diff)
         self._people.display(camera_x,diff)
         self._stargate_shown = self._stargate.display(camera_x, diff)
         self._diamond = self._city.diamond
         if self._diamond is not None:
             self._diamond.x += diff
+        return city_x

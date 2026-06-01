@@ -15,7 +15,7 @@ class MiniMap:
         self._bg = (15, 15, 15)
         self._border = (80, 80, 80)
 
-    def draw(self, plane, meteors, aliens, people, stargate, mutants):
+    def draw(self, plane, meteors, aliens, people, stargate, mutants, city):
         """draw map"""
         screen_w = self._screen.get_width()
         screen_h = self._screen.get_height()
@@ -23,8 +23,8 @@ class MiniMap:
         # CAMERA WINDOW IN WORLD COORDINATES
         camera_left = plane.world_x - screen_w // 2
         camera_right = plane.world_x + screen_w // 2
-        camera_left -=1000
-        camera_right +=1000
+        camera_left -= 1000
+        camera_right += 1000
         camera_width = camera_right - camera_left
 
         # Clear mini-map
@@ -44,7 +44,7 @@ class MiniMap:
         px, py = world_to_map(plane.world_x, plane.y)
         pygame.draw.circle(self._surface, (0, 255, 0), (px, py), 3)
         if plane.carrying_person:
-            pygame.draw.circle(self._surface, (0, 150, 255), (px, py+4), 5)
+            pygame.draw.circle(self._surface, (0, 150, 255), (px, py + 2), 2)
 
         if camera_left <= stargate.world_x <= camera_right:
             mx, my = world_to_map(stargate.world_x, stargate.y)
@@ -54,6 +54,10 @@ class MiniMap:
             if camera_left <= mt.world_x <= camera_right:
                 mx, my = world_to_map(mt.world_x, mt.y)
                 pygame.draw.circle(self._surface, (120, 120, 255), (mx, my), 2)
+
+        if city > 0:
+            cx, cy = world_to_map(city, 594)
+            pygame.draw.circle(self._surface, (255, 255, 255), (cx, cy), 2)
 
         # --- METEORS ---
         for m in meteors:
@@ -68,15 +72,14 @@ class MiniMap:
                 color = (255, 0, 0) if a.hunting else (150, 0, 0)
                 pygame.draw.circle(self._surface, color, (mx, my), 2)
                 if a.carrying_person:
-                    pygame.draw.circle(self._surface, (0, 150, 255), (mx, my+4), 5)
- 
+                    pygame.draw.circle(self._surface, (0, 150, 255), (mx, my + 2), 2)
 
         # --- PEOPLE ---
         for p in people:
             if p.visible is True:
                 if camera_left <= p.world_x <= camera_right:
                     mx, my = world_to_map(p.world_x, p.y)
-                    pygame.draw.circle(self._surface, (0, 150, 255), (mx, my), 5)
+                    pygame.draw.circle(self._surface, (0, 150, 255), (mx, my), 2)
 
         # Draw mini-map in top-right corner
         self._screen.blit(
