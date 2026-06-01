@@ -398,7 +398,8 @@ class Game:
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
-                    self.planet = random.randint(1, 24)
+                    self.planet = random.randint(1, 25)
+                    self.planet = 25
                     self.layer3 = pygame.image.load(
                         f"backgrounds\\layer{self.planet}.png"
                     ).convert_alpha()

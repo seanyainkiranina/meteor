@@ -238,11 +238,11 @@ class Plane:
         """Add score"""
         if self._step < (self._score + amount):
             amt = amount
-            if amount > self._free_energy:
-                self._shield_time += (round((amount) / self._free_energy)) * 100
+            if amount > self._free_energy and self._shield_on is False:
+                self._shield_time += (round((amount) / self._free_energy)) * 10
                 amt -= round((amount) / self._free_energy) * self._free_energy
             if self._score + amt > self._free_energy:
-                self._shield_time += 100
+                self._shield_time += 10
         if self._step < (self._score + amount):
             amt = amount
             if amount > self._free_guy:
