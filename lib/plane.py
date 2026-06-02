@@ -524,6 +524,8 @@ class Plane:
         self._x = self._width // 2 - self._image.get_width() // 2
         self._y = max(0, min(self._height - self._image.get_height(), self._y))
 
+        if self._y>= (800 - self._image.get_height()):
+            self._y = 800 - self._image.get_height()
         if self._right and self._exploding is False:
             self._world_x -= self._speed
         if self._right is False and self._exploding is False:
@@ -533,6 +535,11 @@ class Plane:
             self._shield_time -= 1
             if self._shield_time <= 0:
                 self._inverse = False
+
+        if self._carrying_person:
+            if self._speed == 20:
+                self._speed = self._saved_speed
+            
 
         if self._shield_on:
             if self._speed == 20:
