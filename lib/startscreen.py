@@ -47,7 +47,7 @@ class StartScreen:
         instruct.append("In Invisible Mode you cannot pick up people")
         instruct.append("Impacting a blue bubble increases Energy")
         instruct.append("Bringing a person to the top of the screen minimum 100 * planet pts")
-        instruct.append("Extra life after every 10000 points")
+        instruct.append("Extra life after every 50000 points")
         instruct.append("Esc to exit")
         instruct.append("Anykey to Start")
         return instruct

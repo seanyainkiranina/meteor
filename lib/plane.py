@@ -45,7 +45,10 @@ class Plane:
         self._shield_right = pygame.image.load(
             "player\\shield_plane_right.png"
         ).convert_alpha()
-
+        self._image_fast = pygame.image.load("player\\plane_fast.png").convert_alpha()
+        self._image_right_fast = pygame.image.load(
+            "player\\plane_right_fast.png"
+        ).convert_alpha()
         self._invisible_right = pygame.image.load(
             "player\\plane_inverse.png"
         ).convert_alpha()
@@ -371,6 +374,8 @@ class Plane:
                 and self._carrying_person is False
                 and self._shield_on is False
             ):
+                if self._speed == 20:
+                    self._speed = self._saved_speed
                 if self._inverse is True:
                     self._inverse = False
                 else:
@@ -408,6 +413,7 @@ class Plane:
                 if not self._shield_on:
                     self._y -= self._shield_left.get_height() // 2
                 self._shield_on = True
+                self._inverse = False
 
         if keys[pygame.K_a] and not self._jumped:
             if self._smart_bombs > 0 and not self._using_smart_bombs:
@@ -418,6 +424,8 @@ class Plane:
 
         if self._exploding:
             self._shield_on = False
+            self._inverse = False
+
         if keys[pygame.K_ESCAPE]:
             self._lives = 0
             self.explode()
@@ -452,6 +460,7 @@ class Plane:
             and not self._jumped
         ):
             self._jumped = True
+            self._shield_on = False
             if self._speed == 20:
                 self._speed = self._saved_speed
             else:
@@ -526,6 +535,8 @@ class Plane:
                 self._inverse = False
 
         if self._shield_on:
+            if self._speed == 20:
+                self._speed = self._saved_speed
             self._shield_time -= 1
             if self._shield_time <= 0:
                 self._y += self._shield_left.get_height() // 2
@@ -534,28 +545,44 @@ class Plane:
         if self._lives <= 0:
             self._game_over = True
 
-        if not self._exploding:
+        if self._exploding:
+            return
+        if self._right:
+            if (
+                self._speed == 20
+                and self._shield_on is False
+                and self._carrying_person is False
+                and self._inverse is False
+            ):
+                self._image = self._image_right_fast
+                return
+            if self._shield_on and self._carrying_person is False:
+                self._image = self._shield_right
+                return
+            if self._shield_on is False and self._carrying_person:
+                self._image = self._image_right_person
+                return
+            if self._inverse:
+                self._image = self._invisible_right
+                return
+            self._image = self._image_right
+
+        if not self._right:
+            if (
+                self._speed == 20
+                and self._shield_on is False
+                and self._carrying_person is False
+                and self._inverse is False
+            ):
+                self._image = self._image_fast
+                return
             if self._shield_on:
-                if not self._right:
-                    self._image = self._shield_left
-
-                if self._right:
-                    self._image = self._shield_right
-            else:
-                if self._right:
-                    if self._carrying_person:
-                        self._image = self._image_right_person
-                    else:
-                        self._image = self._image_right
-
-                if not self._right:
-                    if self._carrying_person:
-                        self._image = self._image_person
-                    else:
-                        self._image = self._image_left
-
-                if self.inverse:
-                    if not self._right:
-                        self._image = self._invisible
-                    else:
-                        self._image = self._invisible_right
+                self._image = self._shield_left
+                return
+            if self._carrying_person:
+                self._image = self._image_person
+                return
+            if self._inverse:
+                self._image = self._invisible
+                return
+            self._image = self._image_left
