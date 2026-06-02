@@ -4,6 +4,7 @@ import time
 import re
 import random
 import pygame
+from pygame import mixer
 
 
 class Meteor:
@@ -207,6 +208,10 @@ class Meteor:
 
     def explode(self):
         """Trigger the explosion animation for the asteroid."""
+        mixer.init()
+        mixer.music.load("sounds\\mexplode.mp3")
+        mixer.music.set_volume(0.2)
+        mixer.music.play(1)
         self._asteroid = self.next()  # Get the next explosion frame
 
     def next(self):

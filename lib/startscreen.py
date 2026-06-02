@@ -2,6 +2,7 @@
 
 import time
 import pygame
+from pygame import mixer
 from pygame.locals import (
     QUIT,
     KEYDOWN,
@@ -69,6 +70,11 @@ class StartScreen:
     def display(self,screen):
         """Start up screen"""
         time.sleep(1)
+        mixer.init()
+        mixer.music.load("sounds\\theme.mp3")
+        mixer.music.set_volume(0.7)
+        mixer.music.play(1)
+
         pygame.event.clear()
         pygame.event.clear(KEYDOWN)
         self._screen = screen
@@ -100,6 +106,7 @@ class StartScreen:
                 start_y +=20
             pygame.display.update()
         if self._starting == 2:
+            pygame.mixer.quit()
             pygame.event.clear(KEYDOWN)
             return True
 

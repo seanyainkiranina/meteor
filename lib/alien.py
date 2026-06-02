@@ -2,6 +2,7 @@
 
 import random
 import pygame
+from pygame import mixer
 
 from lib.meteor import Meteor  # pylint: disable=[E0611,W0611]
 from lib.bullet import Bullet  # pylint: disable=[E0611,W0611]
@@ -185,6 +186,10 @@ class Alien:
         if len(lasers)>0:
             for l in lasers[:]:
                 if l.hit(alien_rect):
+                    mixer.init()
+                    mixer.music.load("sounds\\explode.mp3")
+                    mixer.music.set_volume(0.4)
+                    mixer.music.play(1)
                     self._image = self._explosion
                     self._visible = False
                     plane.add_score(100 * self._planet)
@@ -196,6 +201,10 @@ class Alien:
                     continue
                 missle_rect = m.image.get_rect(topleft=(m.x(), m.y()))
                 if missle_rect.colliderect(alien_rect):
+                    mixer.init()
+                    mixer.music.load("sounds\\explode.mp3")
+                    mixer.music.set_volume(0.4)
+                    mixer.music.play(1)
                     self._image = self._explosion
                     self._visible = False
                     plane.add_score(100 * self._planet)

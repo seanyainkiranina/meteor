@@ -3,6 +3,7 @@
 import random
 import time
 import pygame
+from pygame import mixer
 from lib.missle import Missle
 from lib.laserbeam import LaserBeam
 
@@ -13,6 +14,8 @@ class Plane:
     def __init__(self, x, y, speed, width, height, filename, filename_right):
         self._x = x
         self._y = y
+        self._energy_milestones = 0
+        self._life_milestones = 0
         self._saved_speed = speed
         self._smart_bombs = 3
         self._using_smart_bombs = False
@@ -122,11 +125,12 @@ class Plane:
 
     @property
     def step(self):
-        """ get step"""
+        """get step"""
         return self._step
+
     @step.setter
-    def step(self,value):
-        """ set step"""
+    def step(self, value):
+        """set step"""
         self._step = value
 
     @property
@@ -235,24 +239,31 @@ class Plane:
         self._shield_time -= 10
 
     def add_score(self, amount):
-        """Add score"""
-        if self._step < (self._score + amount):
-            amt = amount
-            if amount > self._free_energy and self._shield_on is False:
-                self._shield_time += (round((amount) / self._free_energy)) * 10
-                amt -= round((amount) / self._free_energy) * self._free_energy
-            if self._score + amt > self._free_energy:
-                self._shield_time += 10
-        if self._step < (self._score + amount):
-            amt = amount
-            if amount > self._free_guy:
-                self._lives += round((amount) / self._free_guy)
-                amt -= round((amount) / self._free_guy) * self._free_guy
-            if self._score + amt > self._free_guy:
-                self._lives += 1
+        """Add score and handle shield/life milestones safely."""
         self._score += amount
-        if amount>0:
+
+        if self._score < 0:
             self._step = self._score
+            return
+        # --- Shield milestones ---
+        new_energy_steps = self._score // self._free_energy
+
+        if new_energy_steps > self._energy_milestones:
+            steps_gained = new_energy_steps - self._energy_milestones
+            if not self._shield_on:
+                self._shield_time += steps_gained * 10
+                self._energy_milestones = new_energy_steps
+
+        # --- Extra life milestones ---
+        new_life_steps = self._score // self._free_guy
+
+        if new_life_steps > self._life_milestones:
+            lives_gained = new_life_steps - self._life_milestones
+            self._lives += lives_gained
+            self._life_milestones = new_life_steps
+
+        # Optional: keep _step as "last score processed"
+        self._step = self._score
 
     def add_shield(self, amount):
         """Add shield"""
@@ -315,6 +326,10 @@ class Plane:
             self.hit_on_shield()  # Reduce shield time instead of lives
             return
         self._exploding = True
+        mixer.init()
+        mixer.music.load("sounds\\explodes.mp3")
+        mixer.music.set_volume(0.4)
+        mixer.music.play(1)
         self._y -= self._speed * 2
         self._scale_factor += 0.5  # Start with original size
         if self._explosion_frame < len(self._explosions):
@@ -378,6 +393,10 @@ class Plane:
             self._shield_on = False
 
         if keys[pygame.K_z]:
+            mixer.init()
+            mixer.music.load("sounds\\laser.mp3")
+            mixer.music.set_volume(0.4)
+            mixer.music.play(1)
             self.fire_laser(lasers)
 
         if keys[pygame.K_s]:
@@ -451,11 +470,15 @@ class Plane:
             and not self._shield_on
         ):
             # Fire a missle if space is pressed and there isn't already one on screen
-            if len(self._missles) > 2:
+            if len(self._missles) > 5:
                 return
-            fired_rocket_x = (self._image.get_width() // 2)
+            mixer.init()
+            mixer.music.load("sounds\\rocket.mp3")
+            mixer.music.set_volume(0.4)
+            mixer.music.play(1)
+            fired_rocket_x = self._image.get_width() // 2
             if self._right:
-                fired_rocket_x = 0  
+                fired_rocket_x = 0
             self._missle = Missle(
                 self._x + fired_rocket_x,
                 self._y,
@@ -464,12 +487,25 @@ class Plane:
                 "player\\missle.png",
                 "player\\missle_right.png",
             )
-            if len(self._missles) == 0 and self._y>100:
+            r = random.randint(0, 4)
+            if len(self._missles) == r and self._y > 100:
                 self._missle.up = True
-            if len(self._missles) == 1 and self.y<700:
+
+            r = random.randint(0, 4)
+            if len(self._missles) == r and self.y < 700:
                 self._missle.up = False
                 self._missle.down = True
 
+            r = random.randint(0, 4)
+            if len(self._missles) == r and self.y < 700:
+                self._missle.up = False
+                self._missle.down = False
+                self._missle.upward = True
+
+            r = random.randint(0, 4)
+            if len(self._missles) == r and self.y < 700:
+                self._missle.up = True
+                self._missle.down = False
 
             self._missle.direction = self._right
             if self._missles is None:

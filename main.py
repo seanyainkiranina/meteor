@@ -7,6 +7,7 @@ import sys
 import random
 import os
 from pygame import image
+from pygame import mixer
 from pygame._camera_vidcapture import Camera
 from pygame.examples import aliens
 from pygame.locals import (  # pylint: disable=[E0611,W0611]
@@ -118,6 +119,10 @@ class Game:
         self.background = None  # Will be initialized in run()
         self.aliens = []
         self.mutants = []
+        mixer.init()
+        mixer.music.load("sounds\\stargate.mp3")
+        mixer.music.set_volume(0.7)
+        mixer.music.play(1)
         for _ in range(random.randint(1, self.number_aliens)):
             self.aliens.append(Alien(self.screen, self.plane, self.planet))
 
@@ -214,6 +219,10 @@ class Game:
             # Update positions
             if self.plane.y == 0:
                 if self.plane.carrying_person:
+                    mixer.init()
+                    mixer.music.load("sounds\\pickup.mp3")
+                    mixer.music.set_volume(0.4)
+                    mixer.music.play(1)
                     self.plane.add_score(100 * self.planet)
                     self.plane.carrying_person = False
             # Draw layers (two copies each for looping)
@@ -395,6 +404,10 @@ class Game:
             if self.map_city.ptarget_shown:
                 if self.map_city.people.crash_check(self.plane) and self.plane.inverse is False:
                     self.plane.add_score(3 * self.planet)
+                    mixer.init()
+                    mixer.music.load("sounds\\pickup.mp3")
+                    mixer.music.set_volume(0.4)
+                    mixer.music.play(1)
                     self.plane.carrying_person = True
             if self.map_city.starget_shown:
                 if self.map_city.stargate.crash_check(self.plane):
