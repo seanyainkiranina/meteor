@@ -43,7 +43,7 @@ class StartScreen:
         instruct.append("f to toggle speed burst, g for hyper space jump")
         instruct.append("a to fire smart bomb, m to toggle minimap ")
         instruct.append("q for toggles invisible mode aliens will not target ")
-        instruct.append("z to fire laser. Invisible Mode,Shields and Lasers depleat energy")
+        instruct.append("z to fire laser. Invisible Mode,Shields and Lasers deplete energy")
         instruct.append("In Invisible Mode you cannot pick up people")
         instruct.append("Impacting a blue bubble increases Energy")
         instruct.append("Bringing a person to the top of the screen minimum 100 * planet pts")
